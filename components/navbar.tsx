@@ -26,11 +26,11 @@ export function Navbar() {
             <Link href="/" className="text-sm text-foreground/80 hover:text-primary transition-colors">
               Home
             </Link>
-            <Link href="#courses" className="text-sm text-foreground/80 hover:text-primary transition-colors">
-              Browse
+            <Link href="/" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+              Discover
             </Link>
             <Link href="/admin" className="text-sm text-foreground/80 hover:text-primary transition-colors">
-              Admin
+              Upload
             </Link>
           </div>
 
@@ -56,11 +56,11 @@ export function Navbar() {
             <Link href="/" className="block px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-primary rounded-lg transition-colors">
               Home
             </Link>
-            <Link href="#courses" className="block px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-primary rounded-lg transition-colors">
-              Browse Courses
+            <Link href="/" className="block px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-primary rounded-lg transition-colors">
+              Discover
             </Link>
             <Link href="/admin" className="block px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-primary rounded-lg transition-colors">
-              Admin
+              Upload Video
             </Link>
           </div>
         )}
