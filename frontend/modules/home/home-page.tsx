@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Film, Filter, PlayCircle, Sparkles, UploadCloud } from "lucide-react";
 import { requireCampusUser } from "@/backend/auth/session";
+import { CurtainEntry } from "@/frontend/components/curtain-entry";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
@@ -38,6 +39,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
   await requireCampusUser("/");
   const resolvedParams = (await searchParams) || {};
   const category = getSingleValue(resolvedParams.category) || "All";
+  const entry = getSingleValue(resolvedParams.entry) || "";
   const query = getSingleValue(resolvedParams.q) || "";
   const media = await getApprovedMedia({ category, query });
   const counts = await getLibraryCounts();
@@ -53,6 +55,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-background text-white">
+      <CurtainEntry enabled={entry === "curtain"} />
       <Navbar />
 
       <main className="relative overflow-hidden">
