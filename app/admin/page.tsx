@@ -2,11 +2,12 @@ import { Navbar } from '@/components/navbar';
 import { Plus, Edit2, Trash2, Upload } from 'lucide-react';
 
 export const metadata = {
-  title: 'Upload Videos - BITStream',
-  description: 'Upload and manage your videos on BITStream',
+  title: 'Upload & Share - BITStream',
+  description: 'Upload and share your videos on BITStream',
 };
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export default function AdminPage() {
   return (
