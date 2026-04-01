@@ -1,10 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { AlertCircle, CheckCircle2, Clapperboard, ImagePlus, Link2 } from "lucide-react";
 import { CONTENT_CATEGORIES } from "@/backend/content/types";
-import { SubmitButton } from "@/frontend/components/submit-button";
-import { submitMediaAction } from "@/backend/content/actions";
 
 interface UploadFormProps {
   directUploadEnabled: boolean;
@@ -28,6 +26,20 @@ interface SignedUploadPayload {
   timestamp: string;
 }
 
+interface SubmissionPayload {
+  category: string;
+  description: string;
+  durationLabel: string;
+  externalThumbnailUrl: string;
+  externalVideoUrl: string;
+  tags: string;
+  thumbnailPublicId?: string;
+  thumbnailUrl?: string;
+  title: string;
+  videoPublicId?: string;
+  videoUrl?: string;
+}
+
 async function getSignedUpload(kind: "video" | "thumbnail") {
   const response = await fetch("/api/uploads/sign", {
     method: "POST",
@@ -46,7 +58,13 @@ async function getSignedUpload(kind: "video" | "thumbnail") {
   return payload;
 }
 
-async function uploadAsset(kind: "video" | "thumbnail", file: File): Promise<UploadedAssetState> {
+function uploadAsset(
+  kind: "video" | "thumbnail",
+  file: File,
+  onProgress: (loaded: number, total: number) => void,
+): Promise<UploadedAssetState> {
+  return new Promise(async (resolve, reject) => {
+    try {
   const signedUpload = await getSignedUpload(kind);
   const formData = new FormData();
 
@@ -58,111 +76,156 @@ async function uploadAsset(kind: "video" | "thumbnail", file: File): Promise<Upl
   formData.append("signature", signedUpload.signature);
   formData.append("tags", signedUpload.tags);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${signedUpload.cloudName}/${signedUpload.resourceType}/upload`,
-    {
-      method: "POST",
-      body: formData,
+      const request = new XMLHttpRequest();
+      request.open(
+        "POST",
+        `https://api.cloudinary.com/v1_1/${signedUpload.cloudName}/${signedUpload.resourceType}/upload`,
+      );
+
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          onProgress(event.loaded, event.total);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error("Upload failed."));
+      };
+
+      request.onload = () => {
+        try {
+          const payload = JSON.parse(request.responseText) as {
+            error?: { message?: string };
+            public_id?: string;
+            secure_url?: string;
+          };
+
+          if (request.status < 200 || request.status >= 300 || !payload.secure_url || !payload.public_id) {
+            reject(new Error(payload.error?.message || "Upload failed."));
+            return;
+          }
+
+          resolve({
+            publicId: payload.public_id,
+            url: payload.secure_url,
+          });
+        } catch {
+          reject(new Error("Upload failed."));
+        }
+      };
+
+      request.send(formData);
+    } catch (error) {
+      reject(error instanceof Error ? error : new Error("Upload failed."));
+    }
+  });
+}
+
+async function submitSubmission(payload: SubmissionPayload) {
+  const response = await fetch("/api/uploads/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(payload),
+  });
 
-  const payload = (await response.json()) as {
-    error?: { message?: string };
-    public_id?: string;
-    secure_url?: string;
-  };
+  const result = (await response.json()) as { error?: string; redirectTo?: string; success?: boolean };
 
-  if (!response.ok || !payload.secure_url || !payload.public_id) {
-    throw new Error(payload.error?.message || "Upload failed.");
+  if (!response.ok || !result.success || !result.redirectTo) {
+    throw new Error(result.error || "Unable to save submission.");
   }
 
-  return {
-    publicId: payload.public_id,
-    url: payload.secure_url,
-  };
+  return result;
 }
 
 export function UploadForm({ directUploadEnabled, message, status }: UploadFormProps) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
-  const bypassDirectUploadRef = useRef(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadState, setUploadState] = useState("");
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<UploadedAssetState | null>(null);
   const [uploadedThumbnail, setUploadedThumbnail] = useState<UploadedAssetState | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    if (bypassDirectUploadRef.current) {
-      bypassDirectUploadRef.current = false;
-      return;
-    }
-
-    if (!directUploadEnabled) {
-      return;
-    }
-
-    const videoFile = videoInputRef.current?.files?.[0];
-    const thumbnailFile = thumbnailInputRef.current?.files?.[0];
-
-    if (!videoFile && !thumbnailFile) {
-      return;
-    }
-
     event.preventDefault();
     setUploadError("");
+    setIsSubmitting(true);
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = formData.get("title")?.toString().trim() || "";
+    const description = formData.get("description")?.toString().trim() || "";
+    const category = formData.get("category")?.toString().trim() || "";
+    const tags = formData.get("tags")?.toString() || "";
+    const durationLabel = formData.get("durationLabel")?.toString().trim() || "00:00";
+    const externalVideoUrl = formData.get("externalVideoUrl")?.toString().trim() || "";
+    const externalThumbnailUrl = formData.get("externalThumbnailUrl")?.toString().trim() || "";
+    const videoFile = formData.get("videoFile");
+    const thumbnailFile = formData.get("thumbnailFile");
+    const selectedVideoFile = videoFile instanceof File && videoFile.size > 0 ? videoFile : null;
+    const selectedThumbnailFile = thumbnailFile instanceof File && thumbnailFile.size > 0 ? thumbnailFile : null;
+    const totalBytes = [selectedVideoFile?.size || 0, selectedThumbnailFile?.size || 0].reduce(
+      (sum, size) => sum + size,
+      0,
+    );
+    let completedBytes = 0;
 
     try {
       let nextVideo = uploadedVideo;
       let nextThumbnail = uploadedThumbnail;
 
-      if (videoFile && !uploadedVideo) {
+      if (selectedVideoFile && !uploadedVideo) {
         setUploadState("Uploading video...");
-        nextVideo = await uploadAsset("video", videoFile);
+        nextVideo = await uploadAsset("video", selectedVideoFile, (loaded, total) => {
+          const overall = totalBytes > 0 ? Math.round(((completedBytes + loaded) / totalBytes) * 100) : Math.round((loaded / total) * 100);
+          setUploadPercent(Math.min(overall, 95));
+        });
+        completedBytes += selectedVideoFile.size;
         setUploadedVideo(nextVideo);
       }
 
-      if (thumbnailFile && !uploadedThumbnail) {
+      if (selectedThumbnailFile && !uploadedThumbnail) {
         setUploadState("Uploading thumbnail...");
-        nextThumbnail = await uploadAsset("thumbnail", thumbnailFile);
+        nextThumbnail = await uploadAsset("thumbnail", selectedThumbnailFile, (loaded, total) => {
+          const overall = totalBytes > 0 ? Math.round(((completedBytes + loaded) / totalBytes) * 100) : Math.round((loaded / total) * 100);
+          setUploadPercent(Math.min(overall, 95));
+        });
+        completedBytes += selectedThumbnailFile.size;
         setUploadedThumbnail(nextThumbnail);
       }
 
       setUploadState("Saving submission...");
-      bypassDirectUploadRef.current = true;
+      setUploadPercent(totalBytes > 0 ? 98 : 92);
 
-      if (formRef.current) {
-        const videoUrlField = formRef.current.elements.namedItem("uploadedVideoUrl") as HTMLInputElement | null;
-        const videoPublicIdField = formRef.current.elements.namedItem("uploadedVideoPublicId") as HTMLInputElement | null;
-        const thumbnailUrlField = formRef.current.elements.namedItem("uploadedThumbnailUrl") as HTMLInputElement | null;
-        const thumbnailPublicIdField = formRef.current.elements.namedItem("uploadedThumbnailPublicId") as HTMLInputElement | null;
+      const result = await submitSubmission({
+        category,
+        description,
+        durationLabel,
+        externalThumbnailUrl,
+        externalVideoUrl,
+        tags,
+        thumbnailPublicId: nextThumbnail?.publicId,
+        thumbnailUrl: nextThumbnail?.url,
+        title,
+        videoPublicId: nextVideo?.publicId,
+        videoUrl: nextVideo?.url,
+      });
 
-        if (videoUrlField) {
-          videoUrlField.value = nextVideo?.url || "";
-        }
-
-        if (videoPublicIdField) {
-          videoPublicIdField.value = nextVideo?.publicId || "";
-        }
-
-        if (thumbnailUrlField) {
-          thumbnailUrlField.value = nextThumbnail?.url || "";
-        }
-
-        if (thumbnailPublicIdField) {
-          thumbnailPublicIdField.value = nextThumbnail?.publicId || "";
-        }
-
-        formRef.current.requestSubmit();
-      }
+      setUploadPercent(100);
+      setUploadState("Submission saved. Redirecting...");
+      window.location.href = result.redirectTo || "/upload";
     } catch (error) {
       setUploadState("");
+      setUploadPercent(0);
+      setIsSubmitting(false);
       setUploadError(error instanceof Error ? error.message : "Upload failed.");
+      return;
     }
   }
 
   return (
-    <form ref={formRef} action={submitMediaAction} onSubmit={handleSubmit} className="space-y-7">
+    <form onSubmit={handleSubmit} className="space-y-7">
       {status && message && (
         <div
           className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
@@ -186,11 +249,6 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
           <span>{uploadError}</span>
         </div>
       )}
-
-      <input type="hidden" name="uploadedVideoUrl" defaultValue="" />
-      <input type="hidden" name="uploadedVideoPublicId" defaultValue="" />
-      <input type="hidden" name="uploadedThumbnailUrl" defaultValue="" />
-      <input type="hidden" name="uploadedThumbnailPublicId" defaultValue="" />
 
       <div className="grid gap-6 md:grid-cols-2">
         <label className="space-y-2">
@@ -276,9 +334,8 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
                 {directUploadEnabled ? "Upload a local video file" : "Local file upload is not live yet"}
               </span>
               <input
-                ref={videoInputRef}
                 type="file"
-                name={directUploadEnabled ? undefined : "videoFile"}
+                name="videoFile"
                 accept="video/mp4,video/webm,video/quicktime"
                 className="block w-full rounded-2xl border border-dashed border-white/10 bg-white/6 px-4 py-3 text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#101827]"
               />
@@ -310,9 +367,8 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
                 {directUploadEnabled ? "Upload a local thumbnail image" : "Local image upload is not live yet"}
               </span>
               <input
-                ref={thumbnailInputRef}
                 type="file"
-                name={directUploadEnabled ? undefined : "thumbnailFile"}
+                name="thumbnailFile"
                 accept="image/png,image/jpeg,image/webp"
                 className="block w-full rounded-2xl border border-dashed border-white/10 bg-white/6 px-4 py-3 text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#101827]"
               />
@@ -326,13 +382,30 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
           (directUploadEnabled
             ? "Local files upload directly to Cloudinary before the submission is saved."
             : "Direct uploads become available on the live site after Cloudinary env vars are added in Vercel. Until then, use hosted URLs.")}
+
+        {isSubmitting && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between text-xs uppercase tracking-[0.24em] text-[#f4e3c1]">
+              <span>{uploadState || "Uploading..."}</span>
+              <span>{uploadPercent}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-[#f0d6a8] transition-[width] duration-300 ease-out"
+                style={{ width: `${uploadPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      <SubmitButton
-        idleLabel="Send for review"
-        pendingLabel={uploadState || "Submitting..."}
+      <button
+        type="submit"
+        disabled={isSubmitting}
         className="inline-flex w-full items-center justify-center rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7] disabled:cursor-not-allowed disabled:opacity-70"
-      />
+      >
+        {isSubmitting ? `${uploadState || "Submitting..."} ${uploadPercent}%` : "Send for review"}
+      </button>
     </form>
   );
 }
