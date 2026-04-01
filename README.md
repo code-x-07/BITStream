@@ -24,20 +24,27 @@ BITStream is now structured around a clearer split:
 
 1. Copy `.env.example` into your local environment.
 2. Add Google OAuth credentials and at least one admin email.
-3. Install dependencies.
-4. Run the app.
+3. Add Cloudinary credentials if you want live file uploads on Vercel.
+4. Install dependencies.
+5. Run the app.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Local storage
+## Storage
 
-Development content is stored in:
+Local development content is stored in:
 
 - `database/content-library.json`
 - `public/uploads/videos`
 - `public/uploads/thumbnails`
 
-For production, the included schema in `database/schema.sql` is the intended next step toward a real database and durable object storage.
+Production file uploads can use Cloudinary by setting:
+
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+Without those vars, the live site falls back to hosted URLs for submitted media.

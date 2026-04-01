@@ -6,7 +6,11 @@ import { CONTENT_CATEGORIES, type ContentCategory } from "@/backend/content/type
 import { createSubmission, reviewSubmission } from "@/backend/content/repository";
 import { parseTags } from "@/backend/content/utils";
 import { requireAdminUser, requireCampusUser } from "@/backend/auth/session";
-import { persistThumbnailUpload, persistVideoUpload } from "@/backend/storage/file-uploads";
+import {
+  cloudinaryUploadsEnabled,
+  persistThumbnailUpload,
+  persistVideoUpload,
+} from "@/backend/storage/file-uploads";
 
 function isCategory(value: string): value is ContentCategory {
   return CONTENT_CATEGORIES.includes(value as ContentCategory);
@@ -57,20 +61,30 @@ export async function submitMediaAction(formData: FormData) {
       redirect(getUploadMessageUrl("error", "Use a valid thumbnail URL."));
     }
 
-    if (isHostedRuntime && videoFile instanceof File && videoFile.size > 0) {
+    if (
+      isHostedRuntime &&
+      !cloudinaryUploadsEnabled() &&
+      videoFile instanceof File &&
+      videoFile.size > 0
+    ) {
       redirect(
         getUploadMessageUrl(
           "error",
-          "Direct file upload is not enabled on the live site yet. Paste a hosted video URL instead.",
+          "Direct file upload is not enabled until Cloudinary is configured. Paste a hosted video URL instead.",
         ),
       );
     }
 
-    if (isHostedRuntime && thumbnailFile instanceof File && thumbnailFile.size > 0) {
+    if (
+      isHostedRuntime &&
+      !cloudinaryUploadsEnabled() &&
+      thumbnailFile instanceof File &&
+      thumbnailFile.size > 0
+    ) {
       redirect(
         getUploadMessageUrl(
           "error",
-          "Use a hosted thumbnail URL on the live site instead of uploading an image file.",
+          "Direct image upload is not enabled until Cloudinary is configured. Use a hosted thumbnail URL instead.",
         ),
       );
     }

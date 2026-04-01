@@ -5,6 +5,7 @@ import { SubmitButton } from "@/frontend/components/submit-button";
 import { requireCampusUser } from "@/backend/auth/session";
 import { CONTENT_CATEGORIES } from "@/backend/content/types";
 import { submitMediaAction } from "@/backend/content/actions";
+import { cloudinaryUploadsEnabled } from "@/backend/storage/file-uploads";
 
 interface UploadPageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -19,6 +20,7 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
   const resolvedParams = (await searchParams) || {};
   const status = pickValue(resolvedParams.status);
   const message = pickValue(resolvedParams.message);
+  const directUploadEnabled = cloudinaryUploadsEnabled() || process.env.VERCEL !== "1";
 
   return (
     <div className="min-h-screen bg-background text-white">
@@ -51,8 +53,12 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
                   <p className="text-xs uppercase tracking-[0.3em] text-[#d8bc88]">Best flow</p>
                   <div className="mt-6 space-y-5">
                     {[
-                      "Paste a hosted MP4 or WebM URL for the video.",
-                      "Add a hosted image URL for the thumbnail.",
+                      directUploadEnabled
+                        ? "Upload a video file directly or paste a hosted video URL."
+                        : "Paste a hosted MP4 or WebM URL for the video.",
+                      directUploadEnabled
+                        ? "Upload a thumbnail image directly or paste an image URL."
+                        : "Add a hosted image URL for the thumbnail.",
                       "Keep the title short and tags sharp so the shelf looks clean.",
                     ].map((point, index) => (
                       <div key={point} className="flex gap-4">
@@ -165,7 +171,9 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
                         </label>
 
                         <label className="block space-y-2">
-                          <span className="text-sm text-[#afc0d6]">Optional local file for local demo only</span>
+                          <span className="text-sm text-[#afc0d6]">
+                            {directUploadEnabled ? "Upload a local video file" : "Local file upload is not live yet"}
+                          </span>
                           <input
                             type="file"
                             name="videoFile"
@@ -196,7 +204,9 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
                         </label>
 
                         <label className="block space-y-2">
-                          <span className="text-sm text-[#afc0d6]">Optional local image for local demo only</span>
+                          <span className="text-sm text-[#afc0d6]">
+                            {directUploadEnabled ? "Upload a local thumbnail image" : "Local image upload is not live yet"}
+                          </span>
                           <input
                             type="file"
                             name="thumbnailFile"
@@ -209,8 +219,9 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
                   </div>
 
                   <div className="rounded-[1.75rem] border border-[#f0d6a8]/20 bg-[#f0d6a8]/8 p-5 text-sm leading-7 text-[#d9e3f0]">
-                    On the live Vercel site, use hosted URLs for the video and thumbnail. Direct file upload is only
-                    safe for local development right now.
+                    {directUploadEnabled
+                      ? "Direct uploads are enabled for this environment. Hosted URLs still work if you prefer external media."
+                      : "Direct uploads become available on the live site after Cloudinary env vars are added in Vercel. Until then, use hosted URLs."}
                   </div>
 
                   <SubmitButton
