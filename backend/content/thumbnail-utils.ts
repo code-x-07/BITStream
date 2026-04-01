@@ -1,4 +1,4 @@
-export const DEFAULT_THUMBNAIL_URL = "/default-thumbnail.svg";
+export const DEFAULT_THUMBNAIL_URL = "/default-thumbnail.webp";
 
 const LEGACY_PLACEHOLDERS = new Set(["", "/placeholder.jpg", "/placeholder.svg", DEFAULT_THUMBNAIL_URL]);
 

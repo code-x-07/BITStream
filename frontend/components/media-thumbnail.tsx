@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ImgHTMLAttributes } from "react";
-import { getThumbnailCandidates } from "@/backend/content/thumbnail-utils";
+import { DEFAULT_THUMBNAIL_URL, getThumbnailCandidates } from "@/backend/content/thumbnail-utils";
 
 interface MediaThumbnailProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   src?: string | null;
@@ -10,20 +10,51 @@ interface MediaThumbnailProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
 
 export function MediaThumbnail({ src, videoUrl, alt, ...props }: MediaThumbnailProps) {
   const candidates = getThumbnailCandidates({ thumbnailUrl: src, videoUrl });
-  const [index, setIndex] = useState(0);
+  const [resolvedSrc, setResolvedSrc] = useState(DEFAULT_THUMBNAIL_URL);
 
   useEffect(() => {
-    setIndex(0);
+    let cancelled = false;
+
+    setResolvedSrc(DEFAULT_THUMBNAIL_URL);
+
+    async function resolveThumbnail() {
+      for (const candidate of candidates) {
+        if (candidate === DEFAULT_THUMBNAIL_URL) {
+          if (!cancelled) {
+            setResolvedSrc(DEFAULT_THUMBNAIL_URL);
+          }
+          return;
+        }
+
+        const image = new Image();
+
+        const result = await new Promise<boolean>((resolve) => {
+          image.onload = () => resolve(true);
+          image.onerror = () => resolve(false);
+          image.src = candidate;
+        });
+
+        if (result) {
+          if (!cancelled) {
+            setResolvedSrc(candidate);
+          }
+          return;
+        }
+      }
+    }
+
+    void resolveThumbnail();
+
+    return () => {
+      cancelled = true;
+    };
   }, [src, videoUrl]);
 
   return (
     <img
       {...props}
       alt={alt}
-      src={candidates[index] || candidates[candidates.length - 1]}
-      onError={() => {
-        setIndex((current) => (current < candidates.length - 1 ? current + 1 : current));
-      }}
+      src={resolvedSrc}
     />
   );
 }
