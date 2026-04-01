@@ -17,6 +17,15 @@ function getUploadMessageUrl(status: string, message: string) {
   return `/upload?${params.toString()}`;
 }
 
+function isValidHttpUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export async function submitMediaAction(formData: FormData) {
   const user = await requireCampusUser("/upload");
 
@@ -30,6 +39,7 @@ export async function submitMediaAction(formData: FormData) {
     const externalThumbnailUrl = formData.get("externalThumbnailUrl")?.toString().trim() || "";
     const videoFile = formData.get("videoFile");
     const thumbnailFile = formData.get("thumbnailFile");
+    const isHostedRuntime = process.env.VERCEL === "1";
 
     if (!title || !description) {
       redirect(getUploadMessageUrl("error", "Title and description are required."));
@@ -37,6 +47,32 @@ export async function submitMediaAction(formData: FormData) {
 
     if (!isCategory(category)) {
       redirect(getUploadMessageUrl("error", "Choose a valid content category."));
+    }
+
+    if (externalVideoUrl && !isValidHttpUrl(externalVideoUrl)) {
+      redirect(getUploadMessageUrl("error", "Use a valid hosted video URL."));
+    }
+
+    if (externalThumbnailUrl && !isValidHttpUrl(externalThumbnailUrl)) {
+      redirect(getUploadMessageUrl("error", "Use a valid thumbnail URL."));
+    }
+
+    if (isHostedRuntime && videoFile instanceof File && videoFile.size > 0) {
+      redirect(
+        getUploadMessageUrl(
+          "error",
+          "Direct file upload is not enabled on the live site yet. Paste a hosted video URL instead.",
+        ),
+      );
+    }
+
+    if (isHostedRuntime && thumbnailFile instanceof File && thumbnailFile.size > 0) {
+      redirect(
+        getUploadMessageUrl(
+          "error",
+          "Use a hosted thumbnail URL on the live site instead of uploading an image file.",
+        ),
+      );
     }
 
     const savedVideoUrl =

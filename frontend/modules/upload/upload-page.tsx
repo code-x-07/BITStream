@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, CloudUpload, Film, ImagePlus } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clapperboard, Film, ImagePlus, Link2, UploadCloud } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
 import { SiteFooter } from "@/frontend/components/site-footer";
 import { SubmitButton } from "@/frontend/components/submit-button";
@@ -21,192 +21,208 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
   const message = pickValue(resolvedParams.message);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-white">
       <Navbar />
 
-      <main className="px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="rounded-[2rem] border border-border/70 bg-card/50 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
-            <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">Upload flow</p>
-            <h1 className="mt-3 text-4xl font-bold text-foreground">Submit a video for review</h1>
-            <p className="mt-4 max-w-2xl text-muted-foreground">
-              Signed in as <span className="font-semibold text-foreground">{user.email}</span>. Your upload stays in
-              the pending queue until an admin approves it.
-            </p>
+      <main className="relative overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: "url('/homepage-assets/film-texture.jpg')",
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          }}
+        />
 
-            {status && message && (
-              <div
-                className={`mt-6 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
-                  status === "success"
-                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
-                    : "border-red-400/30 bg-red-500/10 text-red-200"
-                }`}
-              >
-                {status === "success" ? <CheckCircle2 className="mt-0.5 h-4 w-4" /> : <AlertCircle className="mt-0.5 h-4 w-4" />}
-                <span>{message}</span>
-              </div>
-            )}
+        <section className="relative border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+              <aside className="space-y-6">
+                <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#d8bc88]">Upload</p>
+                  <h1 className="mt-4 text-4xl font-semibold text-white">Send a story for review</h1>
+                  <p className="mt-4 text-sm leading-7 text-[#afc0d6]">
+                    Signed in as <span className="font-semibold text-white">{user.email}</span>. Add a clean hosted
+                    video link, a thumbnail, and the category. Admins will review before it goes live.
+                  </p>
+                </div>
 
-            <form action={submitMediaAction} className="mt-8 space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-foreground">Title</span>
-                  <input
-                    name="title"
-                    required
-                    placeholder="Monsoon documentary, movie recap, tutorial..."
-                    className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-foreground">Category</span>
-                  <select
-                    name="category"
-                    required
-                    defaultValue={CONTENT_CATEGORIES[0]}
-                    className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
-                  >
-                    {CONTENT_CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
+                <div className="rounded-[2rem] border border-white/10 bg-[#0d1624]/90 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.2)]">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#d8bc88]">Best flow</p>
+                  <div className="mt-6 space-y-5">
+                    {[
+                      "Paste a hosted MP4 or WebM URL for the video.",
+                      "Add a hosted image URL for the thumbnail.",
+                      "Keep the title short and tags sharp so the shelf looks clean.",
+                    ].map((point, index) => (
+                      <div key={point} className="flex gap-4">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/8 text-sm font-semibold text-[#f0d6a8]">
+                          {index + 1}
+                        </div>
+                        <p className="pt-1 text-sm leading-7 text-[#afc0d6]">{point}</p>
+                      </div>
                     ))}
-                  </select>
-                </label>
-              </div>
-
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-foreground">Description</span>
-                <textarea
-                  name="description"
-                  required
-                  rows={5}
-                  placeholder="Tell reviewers what the video is about, why it belongs on BITStream, and anything they should know."
-                  className="w-full rounded-3xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                />
-              </label>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-foreground">Tags</span>
-                  <input
-                    name="tags"
-                    placeholder="campus, documentary, fest, comedy"
-                    className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-foreground">Duration label</span>
-                  <input
-                    name="durationLabel"
-                    placeholder="12:45"
-                    className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                  />
-                </label>
-              </div>
-
-              <div className="grid gap-6 xl:grid-cols-2">
-                <div className="rounded-3xl border border-border/70 bg-background/60 p-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <Film className="h-4 w-4 text-primary" />
-                    <h2 className="font-semibold text-foreground">Video source</h2>
-                  </div>
-                  <div className="space-y-4">
-                    <label className="block space-y-2">
-                      <span className="text-sm text-muted-foreground">Upload a local demo file</span>
-                      <input
-                        type="file"
-                        name="videoFile"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        className="block w-full rounded-2xl border border-dashed border-border/70 bg-background/80 px-4 py-3 text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-foreground"
-                      />
-                    </label>
-                    <label className="block space-y-2">
-                      <span className="text-sm text-muted-foreground">Or paste a hosted MP4/WebM URL</span>
-                      <input
-                        type="url"
-                        name="externalVideoUrl"
-                        placeholder="https://..."
-                        className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                      />
-                    </label>
                   </div>
                 </div>
+              </aside>
 
-                <div className="rounded-3xl border border-border/70 bg-background/60 p-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <ImagePlus className="h-4 w-4 text-secondary" />
-                    <h2 className="font-semibold text-foreground">Thumbnail</h2>
+              <section className="rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.3)]">
+                {status && message && (
+                  <div
+                    className={`mb-6 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
+                      status === "success"
+                        ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
+                        : "border-red-400/30 bg-red-500/10 text-red-100"
+                    }`}
+                  >
+                    {status === "success" ? (
+                      <CheckCircle2 className="mt-0.5 h-4 w-4" />
+                    ) : (
+                      <AlertCircle className="mt-0.5 h-4 w-4" />
+                    )}
+                    <span>{message}</span>
                   </div>
-                  <div className="space-y-4">
-                    <label className="block space-y-2">
-                      <span className="text-sm text-muted-foreground">Upload an image</span>
+                )}
+
+                <form action={submitMediaAction} className="space-y-7">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-white">Title</span>
                       <input
-                        type="file"
-                        name="thumbnailFile"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="block w-full rounded-2xl border border-dashed border-border/70 bg-background/80 px-4 py-3 text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-secondary-foreground"
+                        name="title"
+                        required
+                        placeholder="Campus documentary, movie cut, tutorial..."
+                        className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
                       />
                     </label>
-                    <label className="block space-y-2">
-                      <span className="text-sm text-muted-foreground">Or paste an image URL</span>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-white">Category</span>
+                      <select
+                        name="category"
+                        required
+                        defaultValue={CONTENT_CATEGORIES[0]}
+                        className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-[#f0d6a8]"
+                      >
+                        {CONTENT_CATEGORIES.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-white">Description</span>
+                    <textarea
+                      name="description"
+                      required
+                      rows={5}
+                      placeholder="What is it, what vibe does it carry, and why should it be featured?"
+                      className="w-full rounded-[1.75rem] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
+                    />
+                  </label>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-white">Tags</span>
                       <input
-                        type="url"
-                        name="externalThumbnailUrl"
-                        placeholder="https://..."
-                        className="w-full rounded-2xl border border-border/70 bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                        name="tags"
+                        placeholder="hostel, fest, monsoon, tutorial"
+                        className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
+                      />
+                    </label>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-white">Duration</span>
+                      <input
+                        name="durationLabel"
+                        placeholder="08:45"
+                        className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
                       />
                     </label>
                   </div>
-                </div>
-              </div>
 
-              <div className="rounded-3xl border border-primary/20 bg-primary/10 p-5 text-sm text-muted-foreground">
-                Small note for now: the local demo supports modest file sizes directly on the app server. For larger
-                videos, paste a hosted URL and let the admin approval flow handle publication.
-              </div>
+                  <div className="grid gap-6 xl:grid-cols-2">
+                    <div className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
+                      <div className="mb-4 flex items-center gap-2">
+                        <Clapperboard className="h-4 w-4 text-[#f0d6a8]" />
+                        <h2 className="font-semibold text-white">Video</h2>
+                      </div>
+                      <div className="space-y-4">
+                        <label className="block space-y-2">
+                          <span className="text-sm text-[#afc0d6]">Hosted MP4 / WebM URL</span>
+                          <div className="relative">
+                            <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8fa3bd]" />
+                            <input
+                              type="url"
+                              name="externalVideoUrl"
+                              placeholder="https://..."
+                              className="w-full rounded-2xl border border-white/10 bg-white/6 py-3 pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
+                            />
+                          </div>
+                        </label>
 
-              <SubmitButton
-                idleLabel="Send for admin approval"
-                pendingLabel="Submitting..."
-                className="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
-              />
-            </form>
-          </section>
-
-          <aside className="space-y-6">
-            <div className="rounded-[2rem] border border-border/70 bg-card/50 p-8">
-              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">How it works</p>
-              <div className="mt-6 space-y-4">
-                {[
-                  "Students sign in with their Goa BITS email account.",
-                  "Uploads go into a pending queue rather than publishing instantly.",
-                  "Admins approve or reject with notes from the moderation dashboard.",
-                  "Approved media automatically shows up on the public discovery page.",
-                ].map((step, index) => (
-                  <div key={step} className="flex gap-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background text-sm font-semibold text-primary">
-                      {index + 1}
+                        <label className="block space-y-2">
+                          <span className="text-sm text-[#afc0d6]">Optional local file for local demo only</span>
+                          <input
+                            type="file"
+                            name="videoFile"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            className="block w-full rounded-2xl border border-dashed border-white/10 bg-white/6 px-4 py-3 text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#101827]"
+                          />
+                        </label>
+                      </div>
                     </div>
-                    <p className="pt-1 text-sm text-muted-foreground">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="rounded-[2rem] border border-border/70 bg-card/50 p-8">
-              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">Review tips</p>
-              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-                <li>Use descriptive titles so category filters stay useful.</li>
-                <li>Short, clear tags improve discoverability on the home page.</li>
-                <li>Thumbnail quality matters because approved uploads become public cards immediately.</li>
-                <li>Hosted MP4/WebM links are best for large files until you plug in cloud storage.</li>
-              </ul>
+                    <div className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
+                      <div className="mb-4 flex items-center gap-2">
+                        <ImagePlus className="h-4 w-4 text-[#f0d6a8]" />
+                        <h2 className="font-semibold text-white">Thumbnail</h2>
+                      </div>
+                      <div className="space-y-4">
+                        <label className="block space-y-2">
+                          <span className="text-sm text-[#afc0d6]">Hosted image URL</span>
+                          <div className="relative">
+                            <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8fa3bd]" />
+                            <input
+                              type="url"
+                              name="externalThumbnailUrl"
+                              placeholder="https://..."
+                              className="w-full rounded-2xl border border-white/10 bg-white/6 py-3 pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
+                            />
+                          </div>
+                        </label>
+
+                        <label className="block space-y-2">
+                          <span className="text-sm text-[#afc0d6]">Optional local image for local demo only</span>
+                          <input
+                            type="file"
+                            name="thumbnailFile"
+                            accept="image/png,image/jpeg,image/webp"
+                            className="block w-full rounded-2xl border border-dashed border-white/10 bg-white/6 px-4 py-3 text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#101827]"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.75rem] border border-[#f0d6a8]/20 bg-[#f0d6a8]/8 p-5 text-sm leading-7 text-[#d9e3f0]">
+                    On the live Vercel site, use hosted URLs for the video and thumbnail. Direct file upload is only
+                    safe for local development right now.
+                  </div>
+
+                  <SubmitButton
+                    idleLabel="Send for review"
+                    pendingLabel="Submitting..."
+                    className="inline-flex w-full items-center justify-center rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7] disabled:cursor-not-allowed disabled:opacity-70"
+                  />
+                </form>
+              </section>
             </div>
-          </aside>
-        </div>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />

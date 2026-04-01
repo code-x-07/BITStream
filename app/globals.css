@@ -130,7 +130,6 @@
       radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 22%),
       linear-gradient(180deg, rgba(255,255,255,0.02), transparent),
       linear-gradient(180deg, #07111f 0%, #091423 45%, #060d18 100%);
-    background-attachment: fixed;
   }
 
   ::selection {
