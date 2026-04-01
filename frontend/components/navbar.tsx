@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clapperboard, ShieldCheck, Upload } from "lucide-react";
+import { ShieldCheck, Upload } from "lucide-react";
 import { getCurrentUser } from "@/backend/auth/session";
 import { loginWithGoogle, logoutAction } from "@/backend/auth/actions";
 
@@ -10,8 +10,8 @@ export async function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-cyan-400 to-secondary shadow-[0_10px_40px_rgba(99,102,241,0.4)]">
-            <Clapperboard className="h-5 w-5 text-white" />
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07111d] shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+            <img src="/icon.svg" alt="BITStream" className="h-full w-full object-cover" />
           </div>
           <div>
             <p className="text-lg font-bold text-foreground">BITStream</p>
