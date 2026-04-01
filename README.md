@@ -1,35 +1,43 @@
 # BITStream
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+BITStream is now structured around a clearer split:
 
-## Built with v0
+- `frontend/`
+  UI modules and reusable presentation components
+- `backend/`
+  auth, moderation, content storage, and server-side actions
+- `database/`
+  the file-backed development store plus SQL schema reference
+- `app/`
+  thin Next.js routes that wire the frontend and backend layers together
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+## Features
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_t48KGIu82URKfkAXjLYZRFxpT4Xy)
+- Google OAuth login
+- Domain restriction to `@goa.bits-pilani.ac.in`
+- Student upload submissions
+- Admin approval and rejection queue
+- Public discovery page that only shows approved uploads
+- My uploads page for submitters
 
-## Getting Started
+## Getting started
 
-First, run the development server:
+1. Copy `.env.example` into your local environment.
+2. Add Google OAuth credentials and at least one admin email.
+3. Install dependencies.
+4. Run the app.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local storage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Development content is stored in:
 
-## Learn More
+- `database/content-library.json`
+- `public/uploads/videos`
+- `public/uploads/thumbnails`
 
-To learn more, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
-
-<a href="https://v0.app/chat/api/kiro/clone/code-x-07/BITStream" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+For production, the included schema in `database/schema.sql` is the intended next step toward a real database and durable object storage.

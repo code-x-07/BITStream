@@ -4,93 +4,79 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Premium Educational Platform Theme */
-  /* Base Colors - Deep Dark Background */
-  --background: #0f1419;
+  --background: #07111f;
   --foreground: #f8f9fa;
-  --card: #1a1f2e;
+  --card: #111c2c;
   --card-foreground: #f8f9fa;
-  --popover: #252d3d;
+  --popover: #172539;
   --popover-foreground: #f8f9fa;
-  
-  /* Primary & Secondary - Elegant Accents */
-  --primary: #6366f1;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #ec4899;
+  --secondary: #f97316;
   --secondary-foreground: #ffffff;
-  
-  /* Accents & Muted */
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: #6366f1;
+  --muted: #223046;
+  --muted-foreground: #9fb0c3;
+  --accent: #22c55e;
   --accent-foreground: #ffffff;
-  
-  /* Borders & Inputs */
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #252d3d;
-  --ring: #6366f1;
-  
-  /* Chart Colors */
-  --chart-1: #6366f1;
-  --chart-2: #ec4899;
+  --border: #203149;
+  --input: #132238;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #f97316;
   --chart-3: #f59e0b;
   --chart-4: #10b981;
   --chart-5: #06b6d4;
-  
-  /* Radius */
   --radius: 0.75rem;
-  
-  /* Sidebar */
-  --sidebar: #1a1f2e;
+  --sidebar: #111c2c;
   --sidebar-foreground: #f8f9fa;
-  --sidebar-primary: #6366f1;
+  --sidebar-primary: #3b82f6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ec4899;
+  --sidebar-accent: #f97316;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #334155;
-  --sidebar-ring: #6366f1;
+  --sidebar-border: #203149;
+  --sidebar-ring: #3b82f6;
 }
 
 .dark {
-  --background: #0f1419;
+  --background: #07111f;
   --foreground: #f8f9fa;
-  --card: #1a1f2e;
+  --card: #111c2c;
   --card-foreground: #f8f9fa;
-  --popover: #252d3d;
+  --popover: #172539;
   --popover-foreground: #f8f9fa;
-  --primary: #6366f1;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #ec4899;
+  --secondary: #f97316;
   --secondary-foreground: #ffffff;
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: #6366f1;
+  --muted: #223046;
+  --muted-foreground: #9fb0c3;
+  --accent: #22c55e;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #252d3d;
-  --ring: #6366f1;
-  --chart-1: #6366f1;
-  --chart-2: #ec4899;
+  --border: #203149;
+  --input: #132238;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #f97316;
   --chart-3: #f59e0b;
   --chart-4: #10b981;
   --chart-5: #06b6d4;
-  --sidebar: #1a1f2e;
+  --sidebar: #111c2c;
   --sidebar-foreground: #f8f9fa;
-  --sidebar-primary: #6366f1;
+  --sidebar-primary: #3b82f6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ec4899;
+  --sidebar-accent: #f97316;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #334155;
-  --sidebar-ring: #6366f1;
+  --sidebar-border: #203149;
+  --sidebar-ring: #3b82f6;
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", "Consolas", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -135,6 +121,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+      radial-gradient(circle at top right, rgba(249, 115, 22, 0.15), transparent 20%),
+      linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
   }
 }
 

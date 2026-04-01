@@ -1,0 +1,55 @@
+import Link from "next/link";
+import type { MediaItem } from "@/backend/content/types";
+import { formatCompactNumber } from "@/backend/content/utils";
+
+interface MediaCardProps {
+  media: MediaItem;
+}
+
+export function MediaCard({ media }: MediaCardProps) {
+  return (
+    <Link
+      href={`/video/${media.slug}`}
+      className="group overflow-hidden rounded-3xl border border-border/70 bg-card/70 shadow-[0_24px_80px_rgba(0,0,0,0.24)] transition-transform duration-300 hover:-translate-y-1 hover:border-primary/60"
+    >
+      <div className="relative aspect-video overflow-hidden border-b border-border/70">
+        <img
+          src={media.thumbnailUrl}
+          alt={media.title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/50 px-3 py-1 text-xs font-semibold text-white">
+          {media.category}
+        </div>
+        <div className="absolute bottom-4 right-4 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white">
+          {media.durationLabel}
+        </div>
+      </div>
+
+      <div className="space-y-3 p-5">
+        <div>
+          <h3 className="line-clamp-2 text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+            {media.title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{media.description}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          {media.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="rounded-full bg-background/80 px-2.5 py-1">
+              #{tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{media.uploader.name}</span>
+          <span>
+            {formatCompactNumber(media.stats.views)} views · {formatCompactNumber(media.stats.likes)} likes
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
