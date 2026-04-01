@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import { CONTENT_CATEGORIES, type ContentCategory } from "@/backend/content/types";
 import { createSubmission, reviewSubmission } from "@/backend/content/repository";
 import { parseTags } from "@/backend/content/utils";
@@ -102,8 +103,10 @@ export async function submitMediaAction(formData: FormData) {
         : { url: "" };
 
     const videoUrl = uploadedVideoUrl || savedVideoUrl.url || externalVideoUrl;
-    const thumbnailUrl =
-      uploadedThumbnailUrl || savedThumbnailUrl.url || externalThumbnailUrl || "/placeholder.jpg";
+    const thumbnailUrl = getPreferredThumbnailUrl({
+      thumbnailUrl: uploadedThumbnailUrl || savedThumbnailUrl.url || externalThumbnailUrl,
+      videoUrl,
+    });
 
     if (!videoUrl) {
       redirect(getUploadMessageUrl("error", "Upload a video file or provide a hosted video URL."));

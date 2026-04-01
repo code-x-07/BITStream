@@ -5,6 +5,7 @@ import { SubmitButton } from "@/frontend/components/submit-button";
 import { requireAdminUser } from "@/backend/auth/session";
 import { getLibraryCounts, getMedia } from "@/backend/content/repository";
 import { reviewSubmissionAction } from "@/backend/content/actions";
+import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import type { MediaItem } from "@/backend/content/types";
 
 interface AdminDashboardProps {
@@ -147,7 +148,10 @@ export async function AdminDashboard({ searchParams }: AdminDashboardProps) {
                         <video
                           controls
                           playsInline
-                          poster={submission.thumbnailUrl}
+                          poster={getPreferredThumbnailUrl({
+                            thumbnailUrl: submission.thumbnailUrl,
+                            videoUrl: submission.videoUrl,
+                          })}
                           className="aspect-video h-full w-full bg-black object-cover"
                         >
                           <source src={submission.videoUrl} />

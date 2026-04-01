@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Film, Filter, PlayCircle, Sparkles, UploadCloud } from "lucide-react";
 import { requireCampusUser } from "@/backend/auth/session";
 import { CurtainEntry } from "@/frontend/components/curtain-entry";
+import { MediaThumbnail } from "@/frontend/components/media-thumbnail";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
@@ -190,8 +191,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
                     href={`/video/${heroCards[0].slug}`}
                     className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d1624] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
                   >
-                    <img
+                    <MediaThumbnail
                       src={heroCards[0].thumbnailUrl}
+                      videoUrl={heroCards[0].videoUrl}
                       alt={heroCards[0].title}
                       className="h-[300px] w-full object-cover transition-transform duration-700 group-hover:scale-105 sm:h-[420px]"
                     />
@@ -212,8 +214,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
                         href={`/video/${item.slug}`}
                         className="group flex h-full flex-col gap-4 rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
                       >
-                        <img
+                        <MediaThumbnail
                           src={item.thumbnailUrl}
+                          videoUrl={item.videoUrl}
                           alt={item.title}
                           className="aspect-video w-full rounded-[1.5rem] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         />

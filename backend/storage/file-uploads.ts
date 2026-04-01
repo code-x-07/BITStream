@@ -6,6 +6,7 @@ import {
   encodeMetadataValue,
   formatDurationLabelFromSeconds,
 } from "@/backend/content/utils";
+import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import type { ApprovalStatus, ContentCategory, MediaItem } from "@/backend/content/types";
 
 const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
@@ -389,10 +390,10 @@ function mapCloudinaryResourceToMedia(resource: CloudinaryUploadResult): MediaIt
     tags,
     durationLabel,
     videoUrl: externalVideoUrl || resource.secure_url,
-    thumbnailUrl:
-      assetRole === "record"
-        ? thumbnailUrl || resource.secure_url || "/placeholder.jpg"
-        : thumbnailUrl || "/placeholder.jpg",
+    thumbnailUrl: getPreferredThumbnailUrl({
+      thumbnailUrl: assetRole === "record" ? thumbnailUrl || resource.secure_url : thumbnailUrl,
+      videoUrl: externalVideoUrl || resource.secure_url,
+    }),
     submittedAt: resource.created_at || new Date().toISOString(),
     updatedAt: decodeMetadataValue(context.updated_at) || resource.created_at || new Date().toISOString(),
     uploader: {

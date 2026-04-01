@@ -5,6 +5,7 @@ import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
 import { requireCampusUser } from "@/backend/auth/session";
 import { getApprovedMedia, getMediaBySlug } from "@/backend/content/repository";
+import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import { formatCompactNumber } from "@/backend/content/utils";
 
 interface VideoPageProps {
@@ -76,7 +77,7 @@ export async function VideoPage({ slug }: VideoPageProps) {
                   <video
                     controls
                     playsInline
-                    poster={media.thumbnailUrl}
+                    poster={getPreferredThumbnailUrl({ thumbnailUrl: media.thumbnailUrl, videoUrl: media.videoUrl })}
                     className="aspect-video w-full bg-black object-cover"
                   >
                     <source src={media.videoUrl} />

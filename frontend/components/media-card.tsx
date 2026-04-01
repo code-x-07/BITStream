@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { MediaItem } from "@/backend/content/types";
 import { formatCompactNumber } from "@/backend/content/utils";
+import { MediaThumbnail } from "@/frontend/components/media-thumbnail";
 
 interface MediaCardProps {
   media: MediaItem;
@@ -13,8 +14,9 @@ export function MediaCard({ media }: MediaCardProps) {
       className="group relative flex h-[290px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,28,44,0.94),rgba(10,17,29,0.98))] shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-[#f0d6a8]/50 sm:h-[308px] sm:rounded-[1.75rem]"
     >
       <div className="relative aspect-video overflow-hidden border-b border-white/8">
-        <img
+        <MediaThumbnail
           src={media.thumbnailUrl}
+          videoUrl={media.videoUrl}
           alt={media.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock3, Eye, ShieldCheck, XCircle } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
+import { MediaThumbnail } from "@/frontend/components/media-thumbnail";
 import { SiteFooter } from "@/frontend/components/site-footer";
 import { requireCampusUser } from "@/backend/auth/session";
 import { getMedia } from "@/backend/content/repository";
@@ -55,8 +56,9 @@ export async function MyUploadsPage() {
             {uploads.map((upload) => (
               <article key={upload.id} className="flex h-full flex-col rounded-[2rem] border border-border/70 bg-card/40 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
                 <div className="space-y-5">
-                  <img
+                  <MediaThumbnail
                     src={upload.thumbnailUrl}
+                    videoUrl={upload.videoUrl}
                     alt={upload.title}
                     className="aspect-video w-full rounded-3xl border border-border/70 object-cover"
                   />

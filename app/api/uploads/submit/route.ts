@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/backend/auth/session";
 import { createSubmission } from "@/backend/content/repository";
+import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import { CONTENT_CATEGORIES, type ContentCategory } from "@/backend/content/types";
 import { parseTags } from "@/backend/content/utils";
 
@@ -70,7 +71,10 @@ export async function POST(request: Request) {
   }
 
   const videoUrl = uploadedVideoUrl || externalVideoUrl;
-  const thumbnailUrl = uploadedThumbnailUrl || externalThumbnailUrl || "/placeholder.jpg";
+  const thumbnailUrl = getPreferredThumbnailUrl({
+    thumbnailUrl: uploadedThumbnailUrl || externalThumbnailUrl,
+    videoUrl,
+  });
 
   if (!videoUrl) {
     return NextResponse.json(
