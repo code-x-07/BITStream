@@ -1,5 +1,11 @@
 import path from "node:path";
 import { readJsonFile, writeJsonFile } from "@/backend/storage/json-store";
+import {
+  cloudinaryMetadataEnabled,
+  createCloudinarySubmissionRecord,
+  listCloudinaryMedia,
+  updateCloudinarySubmissionReview,
+} from "@/backend/storage/file-uploads";
 import type {
   ApprovalStatus,
   ContentLibrary,
@@ -46,10 +52,19 @@ function matchesFilters(media: MediaItem, filters: MediaFilters) {
   return haystack.includes(normalizedQuery);
 }
 
-export async function getMedia(filters: MediaFilters = {}) {
-  const library = await readLibrary();
+async function getLibraryItems() {
+  if (cloudinaryMetadataEnabled()) {
+    return listCloudinaryMedia();
+  }
 
-  return library.media
+  const library = await readLibrary();
+  return library.media;
+}
+
+export async function getMedia(filters: MediaFilters = {}) {
+  const items = await getLibraryItems();
+
+  return items
     .filter((media) => matchesFilters(media, filters))
     .sort((first, second) => {
       return new Date(second.submittedAt).getTime() - new Date(first.submittedAt).getTime();
@@ -61,8 +76,8 @@ export async function getApprovedMedia(filters: Omit<MediaFilters, "status"> = {
 }
 
 export async function getMediaBySlug(slug: string) {
-  const library = await readLibrary();
-  return library.media.find((media) => media.slug === slug || media.id === slug) || null;
+  const items = await getLibraryItems();
+  return items.find((media) => media.slug === slug || media.id === slug) || null;
 }
 
 export async function getLibraryCounts() {
@@ -76,6 +91,25 @@ export async function getLibraryCounts() {
 }
 
 export async function createSubmission(input: CreateSubmissionInput) {
+  if (cloudinaryMetadataEnabled() && input.storage?.videoPublicId) {
+    const slugBase = slugify(input.title) || "campus-story";
+    const slug = `${slugBase}-${Date.now().toString(36)}`;
+
+    return createCloudinarySubmissionRecord({
+      category: input.category,
+      description: input.description,
+      durationLabel: input.durationLabel,
+      publicId: input.storage.videoPublicId,
+      slug,
+      tags: input.tags,
+      thumbnailUrl: input.thumbnailUrl,
+      title: input.title,
+      uploaderEmail: input.uploader.email,
+      uploaderName: input.uploader.name,
+      uploaderRole: input.uploader.role,
+    });
+  }
+
   const library = await readLibrary();
   const timestamp = new Date().toISOString();
   const baseSlug = slugify(input.title);
@@ -122,6 +156,15 @@ export async function reviewSubmission(params: {
   reviewerEmail: string;
   notes?: string;
 }) {
+  if (cloudinaryMetadataEnabled()) {
+    return updateCloudinarySubmissionReview({
+      approvalStatus: params.status,
+      notes: params.notes,
+      publicId: params.id,
+      reviewedByEmail: params.reviewerEmail,
+    });
+  }
+
   const library = await readLibrary();
   const item = library.media.find((media) => media.id === params.id);
 

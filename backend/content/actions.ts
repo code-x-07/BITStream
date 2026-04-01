@@ -91,14 +91,14 @@ export async function submitMediaAction(formData: FormData) {
     }
 
     const savedVideoUrl =
-      videoFile instanceof File && videoFile.size > 0 ? await persistVideoUpload(videoFile) : "";
+      videoFile instanceof File && videoFile.size > 0 ? await persistVideoUpload(videoFile) : { url: "" };
     const savedThumbnailUrl =
       thumbnailFile instanceof File && thumbnailFile.size > 0
         ? await persistThumbnailUpload(thumbnailFile)
-        : "";
+        : { url: "" };
 
-    const videoUrl = savedVideoUrl || externalVideoUrl;
-    const thumbnailUrl = savedThumbnailUrl || externalThumbnailUrl || "/placeholder.jpg";
+    const videoUrl = savedVideoUrl.url || externalVideoUrl;
+    const thumbnailUrl = savedThumbnailUrl.url || externalThumbnailUrl || "/placeholder.jpg";
 
     if (!videoUrl) {
       redirect(getUploadMessageUrl("error", "Upload a video file or provide a hosted video URL."));
@@ -113,6 +113,10 @@ export async function submitMediaAction(formData: FormData) {
       title,
       uploader: user,
       videoUrl,
+      storage: {
+        thumbnailPublicId: savedThumbnailUrl.publicId,
+        videoPublicId: savedVideoUrl.publicId,
+      },
     });
 
     revalidatePath("/");

@@ -61,4 +61,8 @@ export interface CreateSubmissionInput {
   videoUrl: string;
   thumbnailUrl: string;
   uploader: AppSessionUser;
+  storage?: {
+    videoPublicId?: string;
+    thumbnailPublicId?: string;
+  };
 }
