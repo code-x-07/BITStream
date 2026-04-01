@@ -14,6 +14,7 @@ const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME?.trim();
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY?.trim();
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET?.trim();
 const BITSTREAM_TAG = "bitstream-media";
+const RECORD_PUBLIC_ID_PREFIX = "record-";
 
 interface CloudinaryUploadResult {
   secure_url: string;
@@ -181,12 +182,15 @@ async function uploadToCloudinary(
 
 async function updateCloudinaryVideoMetadata(params: {
   publicId: string;
+  resourceType: "video" | "image";
+  assetRole: "media" | "record";
   approvalStatus: ApprovalStatus;
   category: ContentCategory;
   title: string;
   description: string;
   durationLabel: string;
   thumbnailUrl: string;
+  externalVideoUrl?: string;
   uploaderEmail: string;
   uploaderName: string;
   uploaderRole: string;
@@ -198,12 +202,14 @@ async function updateCloudinaryVideoMetadata(params: {
 }) {
   const timestamp = `${Math.floor(Date.now() / 1000)}`;
   const context = buildContextString({
+    asset_role: params.assetRole,
     approval_status: params.approvalStatus,
     category: params.category,
     title: params.title,
     description: params.description,
     duration_label: params.durationLabel,
     thumbnail_url: params.thumbnailUrl,
+    external_video_url: params.externalVideoUrl,
     uploader_email: params.uploaderEmail,
     uploader_name: params.uploaderName,
     uploader_role: params.uploaderRole,
@@ -232,7 +238,7 @@ async function updateCloudinaryVideoMetadata(params: {
   formData.append("signature", signature);
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/explicit`,
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${params.resourceType}/explicit`,
     {
       method: "POST",
       body: formData,
@@ -248,9 +254,79 @@ async function updateCloudinaryVideoMetadata(params: {
   return payload;
 }
 
-async function fetchCloudinaryVideoResources() {
+function createRecordSvgDataUri(title: string) {
+  const label = title.slice(0, 24).replace(/[<>&"]/g, "").trim() || "BITStream";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675"><rect width="1200" height="675" rx="48" fill="#07111D"/><rect x="44" y="44" width="1112" height="587" rx="34" fill="#101C2B"/><rect x="88" y="104" width="338" height="338" rx="52" fill="#F0D6A8"/><path d="M184 184H330C354.301 184 374 203.699 374 228V246C374 270.301 354.301 290 330 290H184V184Z" fill="#081220"/><path d="M184 306H350C371.539 306 389 323.461 389 345C389 366.539 371.539 384 350 384H184V306Z" fill="#081220"/><text x="480" y="260" fill="#F8E8CB" font-family="Arial, sans-serif" font-size="84" font-weight="700">BITStream</text><text x="480" y="346" fill="#D5E0EE" font-family="Arial, sans-serif" font-size="38">${label}</text><text x="480" y="412" fill="#96A9C0" font-family="Arial, sans-serif" font-size="28">External hosted video</text></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+async function createCloudinaryRecordAsset(params: {
+  title: string;
+  slug: string;
+  category: ContentCategory;
+  description: string;
+  durationLabel: string;
+  thumbnailUrl: string;
+  externalVideoUrl: string;
+  uploaderEmail: string;
+  uploaderName: string;
+  uploaderRole: string;
+  tags: string[];
+}) {
+  const timestamp = `${Math.floor(Date.now() / 1000)}`;
+  const folder = "bitstream/records";
+  const publicId = `${RECORD_PUBLIC_ID_PREFIX}${Date.now()}-${crypto.randomUUID()}`;
+  const context = buildContextString({
+    asset_role: "record",
+    approval_status: "pending",
+    category: params.category,
+    title: params.title,
+    description: params.description,
+    duration_label: params.durationLabel,
+    thumbnail_url: params.thumbnailUrl,
+    external_video_url: params.externalVideoUrl,
+    uploader_email: params.uploaderEmail,
+    uploader_name: params.uploaderName,
+    uploader_role: params.uploaderRole,
+    slug: params.slug,
+    updated_at: new Date().toISOString(),
+  });
+  const tags = [BITSTREAM_TAG, ...params.tags].join(",");
+  const signature = createCloudinarySignature({
+    context,
+    folder,
+    public_id: publicId,
+    tags,
+    timestamp,
+  });
+
+  const formData = new FormData();
+  formData.append("file", createRecordSvgDataUri(params.title));
+  formData.append("api_key", CLOUDINARY_API_KEY!);
+  formData.append("timestamp", timestamp);
+  formData.append("folder", folder);
+  formData.append("public_id", publicId);
+  formData.append("context", context);
+  formData.append("tags", tags);
+  formData.append("signature", signature);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const payload = (await response.json()) as CloudinaryUploadResult & { error?: { message?: string } };
+
+  if (!response.ok || !payload.secure_url || !payload.public_id) {
+    throw new Error(payload.error?.message || "Unable to save external video record.");
+  }
+
+  return payload;
+}
+
+async function fetchCloudinaryResources(resourceType: "video" | "image") {
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video/tags/${BITSTREAM_TAG}?context=true&max_results=500`,
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/${resourceType}/tags/${BITSTREAM_TAG}?context=true&max_results=500`,
     {
       headers: {
         Authorization: getCloudinaryBasicAuthHeader(),
@@ -267,9 +343,9 @@ async function fetchCloudinaryVideoResources() {
   return payload.resources || [];
 }
 
-async function fetchCloudinaryVideoResource(publicId: string) {
+async function fetchCloudinaryResource(publicId: string, resourceType: "video" | "image") {
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video/upload/${encodeURIComponent(publicId)}?with_field=context&with_field=tags`,
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/${resourceType}/upload/${encodeURIComponent(publicId)}?with_field=context&with_field=tags`,
     {
       headers: {
         Authorization: getCloudinaryBasicAuthHeader(),
@@ -286,13 +362,23 @@ async function fetchCloudinaryVideoResource(publicId: string) {
   return payload;
 }
 
+async function fetchCloudinaryResourceAny(publicId: string) {
+  try {
+    return await fetchCloudinaryResource(publicId, "video");
+  } catch {
+    return fetchCloudinaryResource(publicId, "image");
+  }
+}
+
 function mapCloudinaryResourceToMedia(resource: CloudinaryUploadResult): MediaItem {
   const context = resource.context?.custom || {};
   const approvalStatus = (decodeMetadataValue(context.approval_status) || "pending") as ApprovalStatus;
+  const assetRole = decodeMetadataValue(context.asset_role);
   const tags = (resource.tags || []).filter((tag) => tag !== BITSTREAM_TAG);
-  const thumbnailUrl = decodeMetadataValue(context.thumbnail_url) || "/placeholder.jpg";
+  const thumbnailUrl = decodeMetadataValue(context.thumbnail_url);
   const durationLabel =
     decodeMetadataValue(context.duration_label) || formatDurationLabelFromSeconds(resource.duration);
+  const externalVideoUrl = decodeMetadataValue(context.external_video_url);
 
   return {
     id: resource.public_id,
@@ -302,8 +388,11 @@ function mapCloudinaryResourceToMedia(resource: CloudinaryUploadResult): MediaIt
     category: (decodeMetadataValue(context.category) || "Campus Stories") as ContentCategory,
     tags,
     durationLabel,
-    videoUrl: resource.secure_url,
-    thumbnailUrl,
+    videoUrl: externalVideoUrl || resource.secure_url,
+    thumbnailUrl:
+      assetRole === "record"
+        ? thumbnailUrl || resource.secure_url || "/placeholder.jpg"
+        : thumbnailUrl || "/placeholder.jpg",
     submittedAt: resource.created_at || new Date().toISOString(),
     updatedAt: decodeMetadataValue(context.updated_at) || resource.created_at || new Date().toISOString(),
     uploader: {
@@ -334,24 +423,50 @@ export async function persistThumbnailUpload(file: File): Promise<UploadedAsset>
 }
 
 export async function createCloudinarySubmissionRecord(params: {
-  publicId: string;
+  publicId?: string;
   slug: string;
   title: string;
   description: string;
   category: ContentCategory;
   durationLabel: string;
   thumbnailUrl: string;
+  externalVideoUrl?: string;
   uploaderEmail: string;
   uploaderName: string;
   uploaderRole: string;
   tags: string[];
 }) {
+  if (!params.publicId) {
+    if (!params.externalVideoUrl) {
+      throw new Error("Missing uploaded video or hosted video URL.");
+    }
+
+    const resource = await createCloudinaryRecordAsset({
+      category: params.category,
+      description: params.description,
+      durationLabel: params.durationLabel,
+      externalVideoUrl: params.externalVideoUrl,
+      slug: params.slug,
+      tags: params.tags,
+      thumbnailUrl: params.thumbnailUrl,
+      title: params.title,
+      uploaderEmail: params.uploaderEmail,
+      uploaderName: params.uploaderName,
+      uploaderRole: params.uploaderRole,
+    });
+
+    return mapCloudinaryResourceToMedia(resource);
+  }
+
   const resource = await updateCloudinaryVideoMetadata({
     publicId: params.publicId,
+    resourceType: "video",
+    assetRole: "media",
     approvalStatus: "pending",
     category: params.category,
     description: params.description,
     durationLabel: params.durationLabel,
+    externalVideoUrl: params.externalVideoUrl,
     slug: params.slug,
     tags: params.tags,
     thumbnailUrl: params.thumbnailUrl,
@@ -370,14 +485,18 @@ export async function updateCloudinarySubmissionReview(params: {
   notes?: string;
   reviewedByEmail: string;
 }) {
-  const existing = await fetchCloudinaryVideoResource(params.publicId);
+  const existing = await fetchCloudinaryResourceAny(params.publicId);
   const current = mapCloudinaryResourceToMedia(existing);
   const updated = await updateCloudinaryVideoMetadata({
     publicId: params.publicId,
+    resourceType: existing.resource_type,
+    assetRole:
+      decodeMetadataValue(existing.context?.custom?.asset_role) === "record" ? "record" : "media",
     approvalStatus: params.approvalStatus,
     category: current.category,
     description: current.description,
     durationLabel: current.durationLabel,
+    externalVideoUrl: decodeMetadataValue(existing.context?.custom?.external_video_url) || undefined,
     slug: current.slug,
     tags: current.tags,
     thumbnailUrl: current.thumbnailUrl,
@@ -394,6 +513,15 @@ export async function updateCloudinarySubmissionReview(params: {
 }
 
 export async function listCloudinaryMedia() {
-  const resources = await fetchCloudinaryVideoResources();
-  return resources.map(mapCloudinaryResourceToMedia);
+  const [videoResources, imageResources] = await Promise.all([
+    fetchCloudinaryResources("video"),
+    fetchCloudinaryResources("image"),
+  ]);
+
+  return [...videoResources, ...imageResources]
+    .filter((resource) => {
+      const assetRole = decodeMetadataValue(resource.context?.custom?.asset_role);
+      return assetRole === "media" || assetRole === "record";
+    })
+    .map(mapCloudinaryResourceToMedia);
 }

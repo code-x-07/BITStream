@@ -91,7 +91,7 @@ export async function getLibraryCounts() {
 }
 
 export async function createSubmission(input: CreateSubmissionInput) {
-  if (cloudinaryMetadataEnabled() && input.storage?.videoPublicId) {
+  if (cloudinaryMetadataEnabled()) {
     const slugBase = slugify(input.title) || "campus-story";
     const slug = `${slugBase}-${Date.now().toString(36)}`;
 
@@ -99,7 +99,8 @@ export async function createSubmission(input: CreateSubmissionInput) {
       category: input.category,
       description: input.description,
       durationLabel: input.durationLabel,
-      publicId: input.storage.videoPublicId,
+      externalVideoUrl: input.videoUrl,
+      publicId: input.storage?.videoPublicId,
       slug,
       tags: input.tags,
       thumbnailUrl: input.thumbnailUrl,

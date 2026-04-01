@@ -342,7 +342,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
           </div>
           <div className="space-y-4">
             <label className="block space-y-2">
-              <span className="text-sm text-[#afc0d6]">Hosted video URL</span>
+              <span className="text-sm text-[#afc0d6]">Hosted video or YouTube/Vimeo URL</span>
               <div className="relative">
                 <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8fa3bd]" />
                 <input
@@ -367,7 +367,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
             </label>
             <p className="text-xs leading-6 text-[#93a8c3]">
               Supported video uploads and links: {SUPPORTED_VIDEO_EXTENSIONS.join(", ")}. Best browser playback is usually
-              `.mp4`, `.webm`, `.mov`, and `.m4v`.
+              `.mp4`, `.webm`, `.mov`, and `.m4v`. Provider links from YouTube and Vimeo are supported too.
             </p>
           </div>
         </div>

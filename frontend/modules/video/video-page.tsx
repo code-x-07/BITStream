@@ -11,6 +11,31 @@ interface VideoPageProps {
   slug: string;
 }
 
+function getEmbedUrl(videoUrl: string) {
+  try {
+    const parsed = new URL(videoUrl);
+    const host = parsed.hostname.replace(/^www\./, "");
+
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtu.be") {
+      const videoId =
+        host === "youtu.be"
+          ? parsed.pathname.split("/").filter(Boolean)[0]
+          : parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).at(-1);
+
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    if (host === "vimeo.com") {
+      const videoId = parsed.pathname.split("/").filter(Boolean).at(-1);
+      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export async function VideoPage({ slug }: VideoPageProps) {
   const user = await getCurrentUser();
   const media = await getMediaBySlug(slug);
@@ -28,6 +53,7 @@ export async function VideoPage({ slug }: VideoPageProps) {
   }
 
   const related = (await getApprovedMedia({ category: media.category })).filter((item) => item.id !== media.id).slice(0, 3);
+  const embedUrl = getEmbedUrl(media.videoUrl);
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,14 +64,24 @@ export async function VideoPage({ slug }: VideoPageProps) {
           <section className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="space-y-6">
               <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
-                <video
-                  controls
-                  playsInline
-                  poster={media.thumbnailUrl}
-                  className="aspect-video w-full bg-black object-cover"
-                >
-                  <source src={media.videoUrl} />
-                </video>
+                {embedUrl ? (
+                  <iframe
+                    src={embedUrl}
+                    title={media.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="aspect-video w-full bg-black"
+                  />
+                ) : (
+                  <video
+                    controls
+                    playsInline
+                    poster={media.thumbnailUrl}
+                    className="aspect-video w-full bg-black object-cover"
+                  >
+                    <source src={media.videoUrl} />
+                  </video>
+                )}
               </div>
 
               <div className="rounded-[2rem] border border-border/70 bg-card/50 p-6">
