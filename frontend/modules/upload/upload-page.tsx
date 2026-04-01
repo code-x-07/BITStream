@@ -34,20 +34,20 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
           }}
         />
 
-        <section className="relative border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
+        <section className="relative border-b border-white/10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
               <aside className="space-y-6">
-                <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+                <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
                   <p className="text-xs uppercase tracking-[0.3em] text-[#d8bc88]">Upload</p>
-                  <h1 className="mt-4 text-4xl font-semibold text-white">Send a story for review</h1>
-                  <p className="mt-4 text-sm leading-7 text-[#afc0d6]">
+                  <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Send a story for review</h1>
+                  <p className="mt-4 text-sm leading-6 text-[#afc0d6] sm:leading-7">
                     Signed in as <span className="font-semibold text-white">{user.email}</span>. Add a clean hosted
                     video link, a thumbnail, and the category. Admins will review before it goes live.
                   </p>
                 </div>
 
-                <div className="rounded-[2rem] border border-white/10 bg-[#0d1624]/90 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.2)]">
+                <div className="rounded-[2rem] border border-white/10 bg-[#0d1624]/90 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.2)] sm:p-8">
                   <p className="text-xs uppercase tracking-[0.3em] text-[#d8bc88]">Best flow</p>
                   <div className="mt-6 space-y-5">
                     {[
@@ -70,7 +70,7 @@ export async function UploadPage({ searchParams }: UploadPageProps) {
                 </div>
               </aside>
 
-              <section className="rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.3)]">
+              <section className="rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-5 shadow-[0_30px_100px_rgba(0,0,0,0.3)] sm:p-8">
                 <UploadForm directUploadEnabled={directUploadEnabled} message={message} status={status} />
               </section>
             </div>

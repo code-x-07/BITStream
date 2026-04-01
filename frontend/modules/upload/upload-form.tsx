@@ -65,16 +65,16 @@ function uploadAsset(
 ): Promise<UploadedAssetState> {
   return new Promise(async (resolve, reject) => {
     try {
-  const signedUpload = await getSignedUpload(kind);
-  const formData = new FormData();
+      const signedUpload = await getSignedUpload(kind);
+      const formData = new FormData();
 
-  formData.append("file", file);
-  formData.append("api_key", signedUpload.apiKey);
-  formData.append("timestamp", signedUpload.timestamp);
-  formData.append("folder", signedUpload.folder);
-  formData.append("public_id", signedUpload.publicId);
-  formData.append("signature", signedUpload.signature);
-  formData.append("tags", signedUpload.tags);
+      formData.append("file", file);
+      formData.append("api_key", signedUpload.apiKey);
+      formData.append("timestamp", signedUpload.timestamp);
+      formData.append("folder", signedUpload.folder);
+      formData.append("public_id", signedUpload.publicId);
+      formData.append("signature", signedUpload.signature);
+      formData.append("tags", signedUpload.tags);
 
       const request = new XMLHttpRequest();
       request.open(
@@ -225,7 +225,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-7">
+    <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7">
       {status && message && (
         <div
           className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
@@ -250,7 +250,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2 sm:gap-6">
         <label className="space-y-2">
           <span className="text-sm font-medium text-white">Title</span>
           <input
@@ -289,7 +289,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
         />
       </label>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2 sm:gap-6">
         <label className="space-y-2">
           <span className="text-sm font-medium text-white">Tags</span>
           <input
@@ -309,8 +309,8 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
         </label>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
+      <div className="grid gap-5 xl:grid-cols-2 sm:gap-6">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/4 p-4 sm:rounded-[1.75rem] sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <Clapperboard className="h-4 w-4 text-[#f0d6a8]" />
             <h2 className="font-semibold text-white">Video</h2>
@@ -343,7 +343,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/4 p-4 sm:rounded-[1.75rem] sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <ImagePlus className="h-4 w-4 text-[#f0d6a8]" />
             <h2 className="font-semibold text-white">Thumbnail</h2>
@@ -377,7 +377,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
         </div>
       </div>
 
-      <div className="rounded-[1.75rem] border border-[#f0d6a8]/20 bg-[#f0d6a8]/8 p-5 text-sm leading-7 text-[#d9e3f0]">
+      <div className="rounded-[1.5rem] border border-[#f0d6a8]/20 bg-[#f0d6a8]/8 p-4 text-sm leading-6 text-[#d9e3f0] sm:rounded-[1.75rem] sm:p-5 sm:leading-7">
         {uploadState ||
           (directUploadEnabled
             ? "Local files upload directly to Cloudinary before the submission is saved."

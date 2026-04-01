@@ -10,7 +10,7 @@ export function MediaCard({ media }: MediaCardProps) {
   return (
     <Link
       href={`/video/${media.slug}`}
-      className="group relative block overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,28,44,0.94),rgba(10,17,29,0.98))] shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-[#f0d6a8]/50"
+      className="group relative block overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,28,44,0.94),rgba(10,17,29,0.98))] shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-[#f0d6a8]/50 sm:rounded-[1.75rem]"
     >
       <div className="relative aspect-video overflow-hidden border-b border-white/8">
         <img
@@ -32,12 +32,12 @@ export function MediaCard({ media }: MediaCardProps) {
         </div>
       </div>
 
-      <div className="relative space-y-3 p-5">
+      <div className="relative space-y-3 p-4 sm:p-5">
         <div>
-          <h3 className="line-clamp-2 text-xl font-semibold text-white transition-colors group-hover:text-[#f0d6a8]">
+          <h3 className="line-clamp-2 text-lg font-semibold text-white transition-colors group-hover:text-[#f0d6a8] sm:text-xl">
             {media.title}
           </h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#b8c6da]">{media.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#b8c6da] sm:leading-6">{media.description}</p>
         </div>
 
         <div className="flex flex-wrap gap-2 text-xs text-[#c6d3e3]">
@@ -48,9 +48,9 @@ export function MediaCard({ media }: MediaCardProps) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between text-sm text-[#99abc3]">
-          <span>{media.uploader.name}</span>
-          <span>
+        <div className="flex items-center justify-between gap-3 text-xs text-[#99abc3] sm:text-sm">
+          <span className="truncate">{media.uploader.name}</span>
+          <span className="shrink-0">
             {formatCompactNumber(media.stats.views)} views · {formatCompactNumber(media.stats.likes)} likes
           </span>
         </div>

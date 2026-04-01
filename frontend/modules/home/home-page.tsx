@@ -64,7 +64,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
           }}
         />
 
-        <section className="relative min-h-[88vh] overflow-hidden border-b border-white/10">
+        <section className="relative min-h-[78vh] overflow-hidden border-b border-white/10 sm:min-h-[88vh]">
           <div
             className="absolute inset-0"
             style={{
@@ -76,33 +76,33 @@ export async function HomePage({ searchParams }: HomePageProps) {
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,211,161,0.14),transparent_24%),linear-gradient(180deg,rgba(5,11,20,0.05),rgba(5,11,20,0.88))]" />
 
-          <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-end px-4 pb-16 pt-16 sm:px-6 lg:px-8 lg:pb-24">
-            <div className="max-w-3xl space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.35em] text-[#f0d6a8] backdrop-blur-sm">
+          <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-end px-4 pb-10 pt-12 sm:min-h-[88vh] sm:px-6 sm:pb-16 sm:pt-16 lg:px-8 lg:pb-24">
+            <div className="max-w-3xl space-y-5 sm:space-y-6">
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[0.28em] text-[#f0d6a8] backdrop-blur-sm sm:px-4 sm:text-xs sm:tracking-[0.35em]">
                 <Sparkles className="h-3.5 w-3.5" />
                 BITS Goa spotlight
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-balance text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
                   Campus Stories
                 </h1>
-                <p className="max-w-2xl text-base leading-7 text-[#d9e3f0] sm:text-lg">
+                <p className="max-w-2xl text-sm leading-6 text-[#d9e3f0] sm:text-lg sm:leading-7">
                   Movies, hostel edits, tutorials, festival cuts, and late-night campus memories collected in one stream.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="#discover"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7]"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7] sm:justify-start"
                 >
                   <PlayCircle className="h-4 w-4" />
                   Start watching
                 </Link>
                 <Link
                   href="/upload"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12 sm:justify-start"
                 >
                   <UploadCloud className="h-4 w-4" />
                   Upload a story
@@ -110,18 +110,18 @@ export async function HomePage({ searchParams }: HomePageProps) {
               </div>
             </div>
 
-            <div className="mt-12 grid gap-4 md:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
+            <div className="mt-8 grid gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3">
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-4 backdrop-blur-sm sm:p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Now streaming</p>
-                <p className="mt-3 text-4xl font-bold text-white">{counts.approved}</p>
+                <p className="mt-3 text-3xl font-bold text-white sm:text-4xl">{counts.approved}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-4 backdrop-blur-sm sm:p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Fresh drops</p>
-                <p className="mt-3 text-4xl font-bold text-white">{Math.min(featured.length, 8)}</p>
+                <p className="mt-3 text-3xl font-bold text-white sm:text-4xl">{Math.min(featured.length, 8)}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-4 backdrop-blur-sm sm:p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Tonight</p>
-                <p className="mt-3 text-lg font-semibold text-white">Campus stories, sharper shelves, and faster picks.</p>
+                <p className="mt-3 text-sm font-semibold text-white sm:text-lg">Campus stories, sharper shelves, and faster picks.</p>
               </div>
             </div>
           </div>
@@ -148,14 +148,14 @@ export async function HomePage({ searchParams }: HomePageProps) {
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible">
               {["All", ...CONTENT_CATEGORIES].map((chip) => {
                 const active = chip === category;
                 return (
                   <Link
                     key={chip}
                     href={buildQueryString(query, chip)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       active
                         ? "bg-[#f0d6a8] text-[#111827]"
                         : "border border-white/10 bg-white/6 text-[#d7e1ef] hover:border-[#f0d6a8]/50 hover:text-[#f0d6a8]"
@@ -173,10 +173,10 @@ export async function HomePage({ searchParams }: HomePageProps) {
           <div className="mx-auto max-w-7xl">
             {heroCards.length > 0 && (
               <div className="mb-14">
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-6 flex items-end justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Featured tonight</p>
-                    <h2 className="mt-2 text-3xl font-semibold text-white">Top picks</h2>
+                    <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Top picks</h2>
                   </div>
                 </div>
 
@@ -188,15 +188,15 @@ export async function HomePage({ searchParams }: HomePageProps) {
                     <img
                       src={heroCards[0].thumbnailUrl}
                       alt={heroCards[0].title}
-                      className="h-[420px] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="h-[300px] w-full object-cover transition-transform duration-700 group-hover:scale-105 sm:h-[420px]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-8">
+                    <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
                       <span className="inline-flex rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs font-semibold text-white">
                         {heroCards[0].category}
                       </span>
-                      <h3 className="mt-4 max-w-xl text-4xl font-semibold text-white">{heroCards[0].title}</h3>
-                      <p className="mt-3 max-w-xl text-sm leading-7 text-[#dce5f2]">{heroCards[0].description}</p>
+                      <h3 className="mt-4 max-w-xl text-2xl font-semibold text-white sm:text-4xl">{heroCards[0].title}</h3>
+                      <p className="mt-3 max-w-xl text-sm leading-6 text-[#dce5f2] sm:leading-7">{heroCards[0].description}</p>
                     </div>
                   </Link>
 
@@ -210,14 +210,14 @@ export async function HomePage({ searchParams }: HomePageProps) {
                         <img
                           src={item.thumbnailUrl}
                           alt={item.title}
-                          className="h-44 w-full rounded-[1.5rem] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                          className="h-40 w-full rounded-[1.5rem] object-cover transition-transform duration-500 group-hover:scale-[1.03] sm:h-44"
                         />
                         <div className="space-y-3 self-center">
                           <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             {item.category}
                           </span>
-                          <h3 className="text-2xl font-semibold text-white">{item.title}</h3>
-                          <p className="text-sm leading-7 text-[#b8c7db]">{item.description}</p>
+                          <h3 className="text-xl font-semibold text-white sm:text-2xl">{item.title}</h3>
+                          <p className="text-sm leading-6 text-[#b8c7db] sm:leading-7">{item.description}</p>
                         </div>
                       </Link>
                     ))}
@@ -239,9 +239,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
                   </div>
                 </div>
 
-                <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory">
+                <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:gap-5">
                   {featured.map((item) => (
-                    <div key={item.id} className="min-w-[290px] max-w-[290px] snap-start">
+                    <div key={item.id} className="min-w-[78vw] max-w-[78vw] snap-start sm:min-w-[290px] sm:max-w-[290px]">
                       <MediaCard media={item} />
                     </div>
                   ))}
@@ -257,9 +257,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
                     <h2 className="mt-2 text-2xl font-semibold text-white">{section.name}</h2>
                   </div>
 
-                  <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory">
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:gap-5">
                     {section.items.map((item) => (
-                      <div key={item.id} className="min-w-[290px] max-w-[290px] snap-start">
+                      <div key={item.id} className="min-w-[78vw] max-w-[78vw] snap-start sm:min-w-[290px] sm:max-w-[290px]">
                         <MediaCard media={item} />
                       </div>
                     ))}
