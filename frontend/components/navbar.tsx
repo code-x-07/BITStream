@@ -15,7 +15,7 @@ export async function Navbar() {
           </div>
           <div>
             <p className="text-lg font-bold text-foreground">BITStream</p>
-            <p className="text-xs text-muted-foreground">Campus uploads with approval workflow</p>
+            <p className="text-xs text-muted-foreground">Streaming from BITS Goa</p>
           </div>
         </Link>
 
@@ -33,7 +33,7 @@ export async function Navbar() {
           )}
           {user?.role === "admin" && (
             <Link href="/admin" className="transition-colors hover:text-primary">
-              Admin Queue
+              Review
             </Link>
           )}
         </nav>

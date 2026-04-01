@@ -30,7 +30,7 @@ function buildQueryString(search: string, category: string) {
 }
 
 function shelfTitle(category: string) {
-  return category === "All" ? "Recently approved" : category;
+  return category === "All" ? "Now Streaming" : category;
 }
 
 export async function HomePage({ searchParams }: HomePageProps) {
@@ -80,7 +80,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
             <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.35em] text-[#f0d6a8] backdrop-blur-sm">
                 <Sparkles className="h-3.5 w-3.5" />
-                Goa campus archive
+                BITS Goa spotlight
               </div>
 
               <div className="space-y-4">
@@ -88,8 +88,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
                   Campus Stories
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-[#d9e3f0] sm:text-lg">
-                  Movies, late-night edits, hostel memories, tutorials, festival cuts, and campus moments collected in
-                  one stream.
+                  Movies, hostel edits, tutorials, festival cuts, and late-night campus memories collected in one stream.
                 </p>
               </div>
 
@@ -113,16 +112,16 @@ export async function HomePage({ searchParams }: HomePageProps) {
 
             <div className="mt-12 grid gap-4 md:grid-cols-3">
               <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Approved</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Now streaming</p>
                 <p className="mt-3 text-4xl font-bold text-white">{counts.approved}</p>
               </div>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Pending</p>
-                <p className="mt-3 text-4xl font-bold text-white">{counts.pending}</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Fresh drops</p>
+                <p className="mt-3 text-4xl font-bold text-white">{Math.min(featured.length, 8)}</p>
               </div>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-5 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Mood</p>
-                <p className="mt-3 text-lg font-semibold text-white">A campus feed with more cinema and less clutter.</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Tonight</p>
+                <p className="mt-3 text-lg font-semibold text-white">Campus stories, sharper shelves, and faster picks.</p>
               </div>
             </div>
           </div>
@@ -177,7 +176,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
                 <div className="mb-6 flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Featured tonight</p>
-                    <h2 className="mt-2 text-3xl font-semibold text-white">Fresh from the archive</h2>
+                    <h2 className="mt-2 text-3xl font-semibold text-white">Top picks</h2>
                   </div>
                 </div>
 
@@ -231,7 +230,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
               <div className="mb-14">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Row one</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Binge row</p>
                     <h2 className="mt-2 text-2xl font-semibold text-white">{shelfTitle(category)}</h2>
                   </div>
                   <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#b6c4d8] md:inline-flex">
@@ -254,7 +253,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
               {categoryShelves.map((section) => (
                 <section key={section.name}>
                   <div className="mb-6">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Category shelf</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Browse</p>
                     <h2 className="mt-2 text-2xl font-semibold text-white">{section.name}</h2>
                   </div>
 
