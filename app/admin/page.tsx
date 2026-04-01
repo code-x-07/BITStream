@@ -1,185 +1,183 @@
-'use client';
+import { Navbar } from '@/components/navbar';
+import { COURSES } from '@/lib/course-data';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
-import { useState } from 'react';
-import Navigation from '@/components/navigation';
-import UploadForm from '@/components/upload-form';
-import { Trash2, Edit2, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-interface UploadedVideo {
-  id: string;
-  title: string;
-  professor: string;
-  course: string;
-  uploadedAt: string;
-  views: number;
-}
+export const metadata = {
+  title: 'Admin Dashboard - BITStream',
+  description: 'Manage courses and content on BITStream',
+};
 
 export default function AdminPage() {
-  const [videos, setVideos] = useState<UploadedVideo[]>([
-    {
-      id: '1',
-      title: 'Advanced Data Structures',
-      professor: 'Prof. John Smith',
-      course: 'CSE 301',
-      uploadedAt: '2024-03-15',
-      views: 245,
-    },
-    {
-      id: '2',
-      title: 'Web Development Fundamentals',
-      professor: 'Prof. Sarah Johnson',
-      course: 'CSE 201',
-      uploadedAt: '2024-03-10',
-      views: 189,
-    },
-    {
-      id: '3',
-      title: 'Machine Learning Basics',
-      professor: 'Prof. Michael Chen',
-      course: 'CSE 401',
-      uploadedAt: '2024-03-05',
-      views: 312,
-    },
-  ]);
-
-  const [showUploadForm, setShowUploadForm] = useState(false);
-
-  const handleVideoUpload = () => {
-    // Reload videos or add new video to list
-    setShowUploadForm(false);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this video?')) {
-      setVideos(videos.filter((v) => v.id !== id));
-    }
-  };
-
   return (
-    <main className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen bg-background">
+      <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Admin Dashboard</h1>
-          <p className="text-foreground/70">Manage and upload educational content</p>
-        </div>
+      <div className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Manage courses and platform content</p>
+            </div>
+            <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
+              <Plus className="w-5 h-5" />
+              New Course
+            </button>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Upload Form */}
-          <div className="lg:col-span-1">
-            <div className="glass-dark p-6 rounded-lg sticky top-24">
-              <h2 className="text-xl font-bold text-foreground mb-4">Upload New Video</h2>
-              {showUploadForm ? (
-                <UploadForm onSuccess={handleVideoUpload} />
-              ) : (
-                <Button
-                  onClick={() => setShowUploadForm(true)}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold glow-cyan"
-                >
-                  Start Uploading
-                </Button>
-              )}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div className="border border-border rounded-xl p-6 bg-card/50 backdrop-blur-sm">
+              <p className="text-muted-foreground text-sm font-medium mb-2">Total Courses</p>
+              <p className="text-3xl font-bold text-foreground">{COURSES.length}</p>
+            </div>
+            <div className="border border-border rounded-xl p-6 bg-card/50 backdrop-blur-sm">
+              <p className="text-muted-foreground text-sm font-medium mb-2">Total Students</p>
+              <p className="text-3xl font-bold text-foreground">{(COURSES.reduce((acc, c) => acc + c.students, 0) / 1000).toFixed(1)}k</p>
+            </div>
+            <div className="border border-border rounded-xl p-6 bg-card/50 backdrop-blur-sm">
+              <p className="text-muted-foreground text-sm font-medium mb-2">Total Lectures</p>
+              <p className="text-3xl font-bold text-foreground">{COURSES.reduce((acc, c) => acc + c.lectures.length, 0)}</p>
+            </div>
+            <div className="border border-border rounded-xl p-6 bg-card/50 backdrop-blur-sm">
+              <p className="text-muted-foreground text-sm font-medium mb-2">Avg Rating</p>
+              <p className="text-3xl font-bold text-foreground">{(COURSES.reduce((acc, c) => acc + c.rating, 0) / COURSES.length).toFixed(1)}</p>
             </div>
           </div>
 
-          {/* Videos List */}
-          <div className="lg:col-span-2">
-            <div className="glass-dark p-6 rounded-lg">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-foreground">Uploaded Videos</h2>
-                <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
-                  {videos.length} videos
-                </span>
+          {/* Courses Table */}
+          <div className="border border-border rounded-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-border bg-white/5">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Course</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Instructor</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Students</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Rating</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Lectures</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {COURSES.map((course) => (
+                    <tr key={course.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-foreground">{course.title}</p>
+                          <p className="text-sm text-muted-foreground">{course.subject}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-foreground">{course.instructor}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-foreground">{(course.students / 1000).toFixed(1)}k</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          <span className="text-foreground font-medium">{course.rating}</span>
+                          <span className="text-yellow-400">★</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-foreground">{course.lectures.length}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-primary">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-red-400 hover:text-red-300">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Add Course Form */}
+          <div className="mt-12 border border-border rounded-xl p-8 bg-card/50 backdrop-blur-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Add New Course</h2>
+
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Course Title</label>
+                  <input
+                    type="text"
+                    placeholder="Enter course title"
+                    className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Instructor</label>
+                  <input
+                    type="text"
+                    placeholder="Enter instructor name"
+                    className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
 
-              {videos.length > 0 ? (
-                <div className="space-y-4 overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="text-left py-3 px-4 text-foreground/60 text-sm font-medium">Title</th>
-                        <th className="text-left py-3 px-4 text-foreground/60 text-sm font-medium hidden sm:table-cell">
-                          Professor
-                        </th>
-                        <th className="text-left py-3 px-4 text-foreground/60 text-sm font-medium hidden md:table-cell">
-                          Uploaded
-                        </th>
-                        <th className="text-left py-3 px-4 text-foreground/60 text-sm font-medium hidden sm:table-cell">
-                          Views
-                        </th>
-                        <th className="text-left py-3 px-4 text-foreground/60 text-sm font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {videos.map((video) => (
-                        <tr key={video.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                          <td className="py-4 px-4">
-                            <div className="flex items-start">
-                              <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-secondary/20 mr-3 flex-shrink-0" />
-                              <div className="min-w-0">
-                                <p className="text-foreground font-medium truncate">{video.title}</p>
-                                <p className="text-sm text-foreground/60">{video.course}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4 text-foreground/80 hidden sm:table-cell text-sm">{video.professor}</td>
-                          <td className="py-4 px-4 text-foreground/80 hidden md:table-cell text-sm">{video.uploadedAt}</td>
-                          <td className="py-4 px-4 text-foreground/80 hidden sm:table-cell text-sm">{video.views}</td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-2">
-                              <button className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="View">
-                                <Eye className="w-4 h-4 text-primary" />
-                              </button>
-                              <button className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Edit">
-                                <Edit2 className="w-4 h-4 text-primary" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(video.id)}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                title="Delete"
-                              >
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-foreground/60">No videos uploaded yet.</p>
-                  <p className="text-sm text-foreground/40 mt-2">Upload your first video using the form on the left.</p>
-                </div>
-              )}
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Description</label>
+                <textarea
+                  placeholder="Enter course description"
+                  rows={4}
+                  className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none"
+                />
+              </div>
 
-            {/* Statistics */}
-            <div className="mt-6 grid grid-cols-3 gap-4">
-              <div className="glass-dark p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-primary">{videos.length}</div>
-                <p className="text-sm text-foreground/60 mt-1">Total Videos</p>
-              </div>
-              <div className="glass-dark p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-secondary">
-                  {videos.reduce((sum, v) => sum + v.views, 0)}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Subject</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Computer Science"
+                    className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  />
                 </div>
-                <p className="text-sm text-foreground/60 mt-1">Total Views</p>
-              </div>
-              <div className="glass-dark p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {Math.round(videos.reduce((sum, v) => sum + v.views, 0) / videos.length) || 0}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Level</label>
+                  <select className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:border-primary transition-colors">
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                  </select>
                 </div>
-                <p className="text-sm text-foreground/60 mt-1">Avg Views</p>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Total Hours</label>
+                  <input
+                    type="number"
+                    placeholder="24"
+                    className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
+
+              <button
+                type="submit"
+                className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Create Course
+              </button>
+            </form>
           </div>
         </div>
       </div>
-    </main>
+
+      {/* Footer */}
+      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border mt-12">
+        <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
+          <p>&copy; 2024 BITStream Admin. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
