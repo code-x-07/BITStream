@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock3, Eye, ShieldCheck, XCircle } from "lucide-react";
+import { Clock3, ShieldCheck, XCircle } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaThumbnail } from "@/frontend/components/media-thumbnail";
 import { SiteFooter } from "@/frontend/components/site-footer";
@@ -95,18 +95,6 @@ export async function MyUploadsPage() {
                         <span className="font-semibold text-foreground">Reviewer note:</span> {upload.approval.notes}
                       </div>
                     )}
-
-                    <div className="mt-auto pt-2">
-                      {upload.approval.status === "approved" && (
-                        <Link
-                          href={`/video/${upload.slug}`}
-                          className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View live page
-                        </Link>
-                      )}
-                    </div>
                   </div>
                 </div>
               </article>
