@@ -40,6 +40,31 @@ interface SubmissionPayload {
   videoUrl?: string;
 }
 
+const SUPPORTED_VIDEO_EXTENSIONS = [
+  ".mp4",
+  ".webm",
+  ".mov",
+  ".m4v",
+  ".ogv",
+  ".ogg",
+  ".mpeg",
+  ".mpg",
+  ".avi",
+  ".mkv",
+];
+
+const SUPPORTED_VIDEO_ACCEPT = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-m4v",
+  "video/ogg",
+  "video/mpeg",
+  "video/x-msvideo",
+  "video/x-matroska",
+  ...SUPPORTED_VIDEO_EXTENSIONS,
+].join(",");
+
 async function getSignedUpload(kind: "video" | "thumbnail") {
   const response = await fetch("/api/uploads/sign", {
     method: "POST",
@@ -317,7 +342,7 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
           </div>
           <div className="space-y-4">
             <label className="block space-y-2">
-              <span className="text-sm text-[#afc0d6]">Hosted MP4 / WebM URL</span>
+              <span className="text-sm text-[#afc0d6]">Hosted video URL</span>
               <div className="relative">
                 <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8fa3bd]" />
                 <input
@@ -336,10 +361,14 @@ export function UploadForm({ directUploadEnabled, message, status }: UploadFormP
               <input
                 type="file"
                 name="videoFile"
-                accept="video/mp4,video/webm,video/quicktime"
+                accept={SUPPORTED_VIDEO_ACCEPT}
                 className="block w-full rounded-2xl border border-dashed border-white/10 bg-white/6 px-4 py-3 text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#101827]"
               />
             </label>
+            <p className="text-xs leading-6 text-[#93a8c3]">
+              Supported video uploads and links: {SUPPORTED_VIDEO_EXTENSIONS.join(", ")}. Best browser playback is usually
+              `.mp4`, `.webm`, `.mov`, and `.m4v`.
+            </p>
           </div>
         </div>
 
