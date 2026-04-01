@@ -58,8 +58,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
           className="pointer-events-none absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage: "url('/homepage-assets/film-texture.jpg')",
-            backgroundPosition: "center",
-            backgroundSize: "cover",
+            backgroundPosition: "top center",
+            backgroundRepeat: "repeat-y",
+            backgroundSize: "100% auto",
           }}
         />
 
