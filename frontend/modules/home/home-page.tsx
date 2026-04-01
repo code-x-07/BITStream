@@ -210,19 +210,21 @@ export async function HomePage({ searchParams }: HomePageProps) {
                       <Link
                         key={item.id}
                         href={`/video/${item.slug}`}
-                        className="group grid gap-4 rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:grid-cols-[200px_1fr]"
+                        className="group flex h-full flex-col gap-4 rounded-[2rem] border border-white/10 bg-[#0d1624]/92 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
                       >
                         <img
                           src={item.thumbnailUrl}
                           alt={item.title}
-                          className="h-40 w-full rounded-[1.5rem] object-cover transition-transform duration-500 group-hover:scale-[1.03] sm:h-44"
+                          className="aspect-video w-full rounded-[1.5rem] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         />
-                        <div className="space-y-3 self-center">
+                        <div className="flex flex-1 flex-col justify-between space-y-3">
+                          <div className="space-y-3">
                           <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             {item.category}
                           </span>
                           <h3 className="text-xl font-semibold text-white sm:text-2xl">{item.title}</h3>
-                          <p className="text-sm leading-6 text-[#b8c7db] sm:leading-7">{item.description}</p>
+                          <p className="line-clamp-2 text-sm leading-6 text-[#b8c7db] sm:leading-7">{item.description}</p>
+                          </div>
                         </div>
                       </Link>
                     ))}
