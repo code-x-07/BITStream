@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { CONTENT_CATEGORIES, type ContentCategory } from "@/backend/content/types";
 import { createSubmission, reviewSubmission } from "@/backend/content/repository";
 import { parseTags } from "@/backend/content/utils";
@@ -120,6 +121,10 @@ export async function submitMediaAction(formData: FormData) {
     revalidatePath("/admin");
     redirect(getUploadMessageUrl("success", "Submission queued for admin approval."));
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     const message = error instanceof Error ? error.message : "Unable to save submission.";
     redirect(getUploadMessageUrl("error", message));
   }
