@@ -3,7 +3,7 @@ import { Heart, PlayCircle, ShieldCheck, UserRound, Eye } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
-import { getCurrentUser } from "@/backend/auth/session";
+import { requireCampusUser } from "@/backend/auth/session";
 import { getApprovedMedia, getMediaBySlug } from "@/backend/content/repository";
 import { formatCompactNumber } from "@/backend/content/utils";
 
@@ -37,7 +37,7 @@ function getEmbedUrl(videoUrl: string) {
 }
 
 export async function VideoPage({ slug }: VideoPageProps) {
-  const user = await getCurrentUser();
+  const user = await requireCampusUser(`/video/${slug}`);
   const media = await getMediaBySlug(slug);
 
   if (!media) {

@@ -26,6 +26,31 @@ function statusTone(status: "pending" | "approved" | "rejected") {
   }
 }
 
+function getEmbedUrl(videoUrl: string) {
+  try {
+    const parsed = new URL(videoUrl);
+    const host = parsed.hostname.replace(/^www\./, "");
+
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtu.be") {
+      const videoId =
+        host === "youtu.be"
+          ? parsed.pathname.split("/").filter(Boolean)[0]
+          : parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).at(-1);
+
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    if (host === "vimeo.com") {
+      const videoId = parsed.pathname.split("/").filter(Boolean).at(-1);
+      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export async function AdminDashboard({ searchParams }: AdminDashboardProps) {
   const admin = await requireAdminUser();
   let counts = {
@@ -108,12 +133,33 @@ export async function AdminDashboard({ searchParams }: AdminDashboardProps) {
                 className="rounded-[2rem] border border-border/70 bg-card/40 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
               >
                 <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-                  <div className="overflow-hidden rounded-3xl border border-border/70 bg-background/70">
-                    <img
-                      src={submission.thumbnailUrl}
-                      alt={submission.title}
-                      className="aspect-video h-full w-full object-cover"
-                    />
+                  <div className="space-y-4">
+                    <div className="overflow-hidden rounded-3xl border border-border/70 bg-background/70">
+                      {getEmbedUrl(submission.videoUrl) ? (
+                        <iframe
+                          src={getEmbedUrl(submission.videoUrl)!}
+                          title={submission.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="aspect-video w-full bg-black"
+                        />
+                      ) : (
+                        <video
+                          controls
+                          playsInline
+                          poster={submission.thumbnailUrl}
+                          className="aspect-video h-full w-full bg-black object-cover"
+                        >
+                          <source src={submission.videoUrl} />
+                        </video>
+                      )}
+                    </div>
+                    <a
+                      href={`/video/${submission.slug}`}
+                      className="inline-flex w-full items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                    >
+                      Open full preview
+                    </a>
                   </div>
 
                   <div className="space-y-5">

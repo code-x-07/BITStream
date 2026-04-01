@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Film, Filter, PlayCircle, Sparkles, UploadCloud } from "lucide-react";
+import { requireCampusUser } from "@/backend/auth/session";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
@@ -34,6 +35,7 @@ function shelfTitle(category: string) {
 }
 
 export async function HomePage({ searchParams }: HomePageProps) {
+  await requireCampusUser("/");
   const resolvedParams = (await searchParams) || {};
   const category = getSingleValue(resolvedParams.category) || "All";
   const query = getSingleValue(resolvedParams.q) || "";
