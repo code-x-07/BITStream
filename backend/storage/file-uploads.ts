@@ -32,6 +32,17 @@ interface UploadedAsset {
   url: string;
 }
 
+interface SignedCloudinaryUpload {
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+  publicId: string;
+  resourceType: "video" | "image";
+  signature: string;
+  tags: string;
+  timestamp: string;
+}
+
 function sanitizeFileName(fileName: string) {
   const extension = path.extname(fileName).toLowerCase() || ".bin";
   return `${Date.now()}-${crypto.randomUUID()}${extension.replace(/[^a-z0-9.]/g, "")}`;
@@ -96,6 +107,37 @@ function buildContextString(metadata: Record<string, string | undefined>) {
     .join("|");
 }
 
+export function createSignedCloudinaryUpload(params: {
+  folderName: "videos" | "thumbnails";
+  resourceType: "video" | "image";
+}) {
+  if (!cloudinaryUploadsEnabled()) {
+    throw new Error("Cloudinary upload is not configured.");
+  }
+
+  const timestamp = `${Math.floor(Date.now() / 1000)}`;
+  const folder = `bitstream/${params.folderName}`;
+  const publicId = `${params.folderName}-${Date.now()}-${crypto.randomUUID()}`;
+  const tags = BITSTREAM_TAG;
+  const signature = createCloudinarySignature({
+    folder,
+    public_id: publicId,
+    tags,
+    timestamp,
+  });
+
+  return {
+    apiKey: CLOUDINARY_API_KEY!,
+    cloudName: CLOUDINARY_CLOUD_NAME!,
+    folder,
+    publicId,
+    resourceType: params.resourceType,
+    signature,
+    tags,
+    timestamp,
+  } satisfies SignedCloudinaryUpload;
+}
+
 async function uploadToCloudinary(
   file: File,
   folderName: "videos" | "thumbnails",
@@ -106,28 +148,19 @@ async function uploadToCloudinary(
   }
 
   assertWithinSizeLimit(file, folderName);
-
-  const timestamp = `${Math.floor(Date.now() / 1000)}`;
-  const folder = `bitstream/${folderName}`;
-  const publicId = `${folderName}-${Date.now()}-${crypto.randomUUID()}`;
-  const signature = createCloudinarySignature({
-    folder,
-    public_id: publicId,
-    tags: BITSTREAM_TAG,
-    timestamp,
-  });
+  const signedUpload = createSignedCloudinaryUpload({ folderName, resourceType });
 
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("api_key", CLOUDINARY_API_KEY!);
-  formData.append("timestamp", timestamp);
-  formData.append("folder", folder);
-  formData.append("public_id", publicId);
-  formData.append("signature", signature);
-  formData.append("tags", BITSTREAM_TAG);
+  formData.append("api_key", signedUpload.apiKey);
+  formData.append("timestamp", signedUpload.timestamp);
+  formData.append("folder", signedUpload.folder);
+  formData.append("public_id", signedUpload.publicId);
+  formData.append("signature", signedUpload.signature);
+  formData.append("tags", signedUpload.tags);
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
+    `https://api.cloudinary.com/v1_1/${signedUpload.cloudName}/${resourceType}/upload`,
     {
       method: "POST",
       body: formData,

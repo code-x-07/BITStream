@@ -42,6 +42,10 @@ export async function submitMediaAction(formData: FormData) {
     const durationLabel = formData.get("durationLabel")?.toString().trim() || "00:00";
     const externalVideoUrl = formData.get("externalVideoUrl")?.toString().trim() || "";
     const externalThumbnailUrl = formData.get("externalThumbnailUrl")?.toString().trim() || "";
+    const uploadedVideoUrl = formData.get("uploadedVideoUrl")?.toString().trim() || "";
+    const uploadedVideoPublicId = formData.get("uploadedVideoPublicId")?.toString().trim() || "";
+    const uploadedThumbnailUrl = formData.get("uploadedThumbnailUrl")?.toString().trim() || "";
+    const uploadedThumbnailPublicId = formData.get("uploadedThumbnailPublicId")?.toString().trim() || "";
     const videoFile = formData.get("videoFile");
     const thumbnailFile = formData.get("thumbnailFile");
     const isHostedRuntime = process.env.VERCEL === "1";
@@ -97,8 +101,9 @@ export async function submitMediaAction(formData: FormData) {
         ? await persistThumbnailUpload(thumbnailFile)
         : { url: "" };
 
-    const videoUrl = savedVideoUrl.url || externalVideoUrl;
-    const thumbnailUrl = savedThumbnailUrl.url || externalThumbnailUrl || "/placeholder.jpg";
+    const videoUrl = uploadedVideoUrl || savedVideoUrl.url || externalVideoUrl;
+    const thumbnailUrl =
+      uploadedThumbnailUrl || savedThumbnailUrl.url || externalThumbnailUrl || "/placeholder.jpg";
 
     if (!videoUrl) {
       redirect(getUploadMessageUrl("error", "Upload a video file or provide a hosted video URL."));
@@ -114,8 +119,8 @@ export async function submitMediaAction(formData: FormData) {
       uploader: user,
       videoUrl,
       storage: {
-        thumbnailPublicId: savedThumbnailUrl.publicId,
-        videoPublicId: savedVideoUrl.publicId,
+        thumbnailPublicId: uploadedThumbnailPublicId || savedThumbnailUrl.publicId,
+        videoPublicId: uploadedVideoPublicId || savedVideoUrl.publicId,
       },
     });
 
