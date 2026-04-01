@@ -5,6 +5,7 @@ import { SubmitButton } from "@/frontend/components/submit-button";
 import { requireAdminUser } from "@/backend/auth/session";
 import { getLibraryCounts, getMedia } from "@/backend/content/repository";
 import { reviewSubmissionAction } from "@/backend/content/actions";
+import type { MediaItem } from "@/backend/content/types";
 
 interface AdminDashboardProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -27,8 +28,23 @@ function statusTone(status: "pending" | "approved" | "rejected") {
 
 export async function AdminDashboard({ searchParams }: AdminDashboardProps) {
   const admin = await requireAdminUser();
-  const counts = await getLibraryCounts();
-  const submissions = await getMedia();
+  let counts = {
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  };
+  let submissions: MediaItem[] = [];
+  let loadError = "";
+
+  try {
+    counts = await getLibraryCounts();
+    submissions = await getMedia();
+  } catch (error) {
+    loadError =
+      error instanceof Error
+        ? error.message
+        : "Unable to load submission data right now. Please try again in a moment.";
+  }
   const resolvedParams = (await searchParams) || {};
   const status = normalize(resolvedParams.status);
 
@@ -78,6 +94,12 @@ export async function AdminDashboard({ searchParams }: AdminDashboardProps) {
               </div>
             </div>
           </section>
+
+          {loadError && (
+            <section className="rounded-[2rem] border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-100">
+              Unable to load moderation data. {loadError}
+            </section>
+          )}
 
           <section className="space-y-5">
             {submissions.map((submission) => (

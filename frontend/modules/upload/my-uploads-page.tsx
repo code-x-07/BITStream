@@ -4,6 +4,7 @@ import { Navbar } from "@/frontend/components/navbar";
 import { SiteFooter } from "@/frontend/components/site-footer";
 import { requireCampusUser } from "@/backend/auth/session";
 import { getMedia } from "@/backend/content/repository";
+import type { MediaItem } from "@/backend/content/types";
 
 function tone(status: "pending" | "approved" | "rejected") {
   switch (status) {
@@ -18,7 +19,17 @@ function tone(status: "pending" | "approved" | "rejected") {
 
 export async function MyUploadsPage() {
   const user = await requireCampusUser("/my-uploads");
-  const uploads = await getMedia({ uploaderEmail: user.email });
+  let uploads: MediaItem[] = [];
+  let loadError = "";
+
+  try {
+    uploads = await getMedia({ uploaderEmail: user.email });
+  } catch (error) {
+    loadError =
+      error instanceof Error
+        ? error.message
+        : "Unable to load your uploads right now. Please try again in a moment.";
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,6 +44,12 @@ export async function MyUploadsPage() {
               Review status, moderator notes, and public availability for your content.
             </p>
           </section>
+
+          {loadError && (
+            <section className="rounded-[2rem] border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-100">
+              Unable to load your submissions. {loadError}
+            </section>
+          )}
 
           <section className="space-y-4">
             {uploads.map((upload) => (

@@ -8,7 +8,7 @@ import {
 } from "@/backend/content/utils";
 import type { ApprovalStatus, ContentCategory, MediaItem } from "@/backend/content/types";
 
-const MAX_VIDEO_SIZE_BYTES = 40 * 1024 * 1024;
+const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_SIZE_BYTES = 6 * 1024 * 1024;
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME?.trim();
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY?.trim();
@@ -54,7 +54,7 @@ function assertWithinSizeLimit(file: File, folderName: "videos" | "thumbnails") 
   if (file.size > maxBytes) {
     throw new Error(
       folderName === "videos"
-        ? "Video file is too large. Keep it under 40MB or use a hosted URL."
+        ? "Video file is too large. Keep it under 100MB or use a hosted URL."
         : "Thumbnail image is too large. Keep it under 6MB or use a hosted URL.",
     );
   }
@@ -269,7 +269,7 @@ async function fetchCloudinaryVideoResources() {
 
 async function fetchCloudinaryVideoResource(publicId: string) {
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video/upload/${encodeURIComponent(publicId)}?context=true`,
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video/upload/${encodeURIComponent(publicId)}?with_field=context&with_field=tags`,
     {
       headers: {
         Authorization: getCloudinaryBasicAuthHeader(),
