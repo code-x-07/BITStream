@@ -41,12 +41,15 @@ export async function Navbar() {
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
           {user ? (
             <>
-              <Link href="/profile" className="hidden rounded-full border border-border/80 bg-card/70 px-4 py-2 text-right transition-colors hover:border-primary/50 sm:block">
-  <p className="text-sm font-medium text-foreground">{user.name}</p>
-  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-    {user.role === "admin" ? "Admin" : "Student"}
-  </p>
-</Link>
+              <Link
+                href="/profile"
+                className="hidden rounded-full border border-border/80 bg-card/70 px-4 py-2 text-right transition-colors hover:border-primary/50 hover:bg-primary/5 sm:block"
+              >
+                <p className="text-sm font-medium text-foreground">{user.name}</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {user.role === "admin" ? "Admin" : "Student"}
+                </p>
+              </Link>
               <Link
                 href={user.role === "admin" ? "/admin" : "/upload"}
                 className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20 sm:px-4 sm:text-sm"
@@ -87,6 +90,11 @@ export async function Navbar() {
           {user && (
             <Link href="/my-uploads" className="whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:text-primary">
               My Uploads
+            </Link>
+          )}
+          {user && (
+            <Link href="/profile" className="whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:text-primary">
+              Profile
             </Link>
           )}
           {user?.role === "admin" && (

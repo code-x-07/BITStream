@@ -1,9 +1,9 @@
-import { VideoTracker } from "@/frontend/components/video-tracker";
 import { notFound } from "next/navigation";
 import { Heart, PlayCircle, ShieldCheck, UserRound, Eye } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
+import { TrackedVideoPlayer } from "@/frontend/components/tracked-video-player";
 import { requireCampusUser } from "@/backend/auth/session";
 import { getApprovedMedia, getMediaBySlug } from "@/backend/content/repository";
 import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
@@ -66,26 +66,17 @@ export async function VideoPage({ slug }: VideoPageProps) {
           <section className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="space-y-6">
               <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
-                {embedUrl ? (
-                  <iframe
-                    src={embedUrl}
-                    title={media.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="aspect-video w-full bg-black"
-                  />
-                ) : (
-                  <VideoTracker slug={slug}>
-                    <video
-                    controls
-                    playsInline
-                    poster={getPreferredThumbnailUrl({ thumbnailUrl: media.thumbnailUrl, videoUrl: media.videoUrl })}
-                    className="aspect-video w-full bg-black object-cover"
-                  >
-                    <source src={media.videoUrl} />
-                  </video>
-                  </VideoTracker>
-                )}
+                <TrackedVideoPlayer
+                  category={media.category}
+                  description={media.description}
+                  durationLabel={media.durationLabel}
+                  embedUrl={embedUrl}
+                  poster={getPreferredThumbnailUrl({ thumbnailUrl: media.thumbnailUrl, videoUrl: media.videoUrl })}
+                  title={media.title}
+                  videoId={media.id}
+                  videoSlug={media.slug}
+                  videoUrl={media.videoUrl}
+                />
               </div>
 
               <div className="rounded-[2rem] border border-border/70 bg-card/50 p-6">

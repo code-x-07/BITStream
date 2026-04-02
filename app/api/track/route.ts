@@ -1,22 +1,46 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/backend/auth/session";
-import { supabase } from "@/backend/storage/supabase";
+import { recordWatchEvent } from "@/backend/analytics/service";
+import type { TrackWatchEventInput, WatchEventType } from "@/backend/analytics/types";
+
+const EVENT_TYPES = new Set<WatchEventType>(["opened", "started", "heartbeat", "paused", "completed"]);
+
+function normalizeNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json().catch(() => null);
-  if (!body || !body.mediaSlug || !body.durationSeconds) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase.from('watch_history').insert({
-    user_email: user.email,
-    media_slug: body.mediaSlug,
-    duration_watched_seconds: body.durationSeconds
-  });
+  const body = (await request.json().catch(() => null)) as Partial<TrackWatchEventInput> | null;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
+  if (!body?.mediaSlug || !body.mediaTitle || !body.sessionId || !body.eventType || !EVENT_TYPES.has(body.eventType)) {
+    return NextResponse.json({ error: "Invalid tracking payload." }, { status: 400 });
+  }
+
+  try {
+    const result = await recordWatchEvent(user, {
+      currentTimeSeconds: normalizeNumber(body.currentTimeSeconds),
+      durationSeconds: normalizeNumber(body.durationSeconds),
+      eventType: body.eventType,
+      mediaCategory: body.mediaCategory,
+      mediaId: body.mediaId,
+      mediaSlug: body.mediaSlug,
+      mediaTitle: body.mediaTitle,
+      metadata: body.metadata,
+      progressPercent: normalizeNumber(body.progressPercent),
+      sessionId: body.sessionId,
+      videoUrl: body.videoUrl,
+      watchSeconds: normalizeNumber(body.watchSeconds) || 0,
+    });
+
+    return NextResponse.json({ success: true, ...result }, { status: result.enabled ? 200 : 202 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to track watch event.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
