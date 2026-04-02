@@ -45,14 +45,4 @@ This project is split across six contributors. The ownership below follows the p
 - Read next: `app/api/auth/`, `backend/content/actions.ts`, `app/api/track/`
 - Why: These files control authentication, authorization, validation, and attack-surface testing.
 
-## Major Contribution Note
 
-Hemant Kushwaha is the major contributor for this project because the unassigned integration-heavy work sits in:
-
-- `database/supabase/`
-- `backend/analytics/`
-- `backend/storage/supabase.ts`
-- `app/api/track/`
-- `app/profile/`
-
-Any work that does not clearly fall under another member’s table role should be credited to Hemant as the integration and SQL lead.
