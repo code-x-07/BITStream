@@ -35,6 +35,11 @@ export async function ProfilePage() {
                   <div className="rounded-[1.75rem] border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
                     <p className="font-semibold">Supabase analytics is not fully active yet.</p>
                     <p className="mt-2 text-amber-100/90">{analytics.reason}</p>
+                    <p className="mt-2 text-amber-100/75">
+                      Required file:
+                      {" "}
+                      <code className="rounded bg-black/20 px-2 py-1 text-xs">database/supabase/analytics-schema.sql</code>
+                    </p>
                   </div>
                 )}
               </div>

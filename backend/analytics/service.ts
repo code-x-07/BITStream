@@ -41,6 +41,21 @@ const EMPTY_ANALYTICS: UserAnalyticsResult = {
   popularContent: [],
 };
 
+function formatAnalyticsSetupReason(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("user_profiles") ||
+    normalized.includes("media_watch_events") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("does not exist")
+  ) {
+    return "Supabase is connected, but the analytics tables are missing. Run database/supabase/analytics-schema.sql in the Supabase SQL editor, then redeploy.";
+  }
+
+  return message;
+}
+
 export async function ensureAnalyticsProfile(user: AppSessionUser) {
   const supabase = getAnalyticsAdminClient();
 
@@ -296,7 +311,7 @@ export async function getUserAnalytics(user: AppSessionUser): Promise<UserAnalyt
       ...EMPTY_ANALYTICS,
       reason:
         error instanceof Error
-          ? error.message
+          ? formatAnalyticsSetupReason(error.message)
           : "Supabase analytics is configured, but the analytics tables are not ready yet.",
       overview: {
         ...EMPTY_ANALYTICS.overview,
