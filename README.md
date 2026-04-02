@@ -48,3 +48,9 @@ Production file uploads can use Cloudinary by setting:
 - `CLOUDINARY_API_SECRET`
 
 Without those vars, the live site falls back to hosted URLs for submitted media.
+
+## Team Split
+
+Team ownership and folder-level contribution mapping are documented in:
+
+- `TEAM_SPLIT.md`
