@@ -11,7 +11,7 @@ export async function Navbar() {
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07111d] shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
-            <img src="/icon.svg" alt="BITStream" className="h-full w-full object-cover" />
+            <img src="/placeholder.svg" alt="BITStream" className="h-full w-full object-cover" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-base font-bold text-foreground sm:text-lg">BITStream</p>
