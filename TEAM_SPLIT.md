@@ -1,7 +1,6 @@
 # BITStream Team Split
 
-This project is split across six contributors. The ownership below follows the provided role table, with Hemant Kushwaha carrying the major contribution and any cross-cutting or unassigned integration work.
-
+This project is split across six contributors. 
 ## Ownership Summary
 
 | Member | Role | Primary Folders To Read | Contribution Scope |
