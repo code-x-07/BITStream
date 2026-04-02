@@ -7,6 +7,14 @@ import { getUserAnalytics } from "@/backend/analytics/service";
 import { formatPercentage, formatWatchTime } from "@/backend/analytics/utils";
 import { ProfileCharts } from "@/frontend/modules/profile/profile-charts";
 
+function formatISTDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(new Date(value));
+}
+
 export async function ProfilePage() {
   const user = await requireCampusUser("/profile");
   const analytics = await getUserAnalytics(user);
@@ -93,7 +101,7 @@ export async function ProfilePage() {
                 <p className="text-xs uppercase tracking-[0.24em]">Last active</p>
               </div>
               <p className="mt-4 text-lg font-semibold text-foreground">
-                {analytics.overview.lastActiveAt ? new Date(analytics.overview.lastActiveAt).toLocaleString() : "Not tracked yet"}
+                {analytics.overview.lastActiveAt ? `${formatISTDateTime(analytics.overview.lastActiveAt)} IST` : "Not tracked yet"}
               </p>
             </div>
           </section>
@@ -120,7 +128,7 @@ export async function ProfilePage() {
                       <div>
                         <p className="text-xs uppercase tracking-[0.22em] text-[#d8bc88]">{item.mediaCategory}</p>
                         <p className="mt-2 text-base font-semibold text-white">{item.mediaTitle}</p>
-                        <p className="mt-1 text-sm text-[#aab8cb]">{new Date(item.watchedAt).toLocaleString()}</p>
+                        <p className="mt-1 text-sm text-[#aab8cb]">{formatISTDateTime(item.watchedAt)} IST</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-white">{formatPercentage(item.progressPercent)}</p>
