@@ -6,7 +6,7 @@ This project is split across six contributors. The ownership below follows the p
 
 | Member | Role | Primary Folders To Read | Contribution Scope |
 | --- | --- | --- | --- |
-| Hemant Kushwaha | SQL Development Lead | `database/`, `database/supabase/`, `backend/analytics/`, `backend/storage/supabase.ts`, `app/api/track/`, `app/profile/` | Major contribution owner. Owns the core SQL layer, analytics integration, views, procedures/triggers strategy, and any unassigned cross-layer work. |
+| Hemant Kushwaha | SQL Development Lead | `database/`, `database/supabase/`, `backend/analytics/`, `backend/storage/supabase.ts`, `app/api/track/`, `app/profile/` | The core SQL layer, analytics integration, views, procedures/triggers strategy, and any unassigned cross-layer work. |
 | Kanav Midha | SQL & Analytics | `database/supabase/analytics-queries.sql`, `backend/analytics/service.ts`, `frontend/modules/profile/` | Owns analytical queries for view counts, watch duration, user engagement, content popularity, and metrics validation. |
 | Abhisht Shankar | Backend Developer | `backend/content/`, `backend/storage/`, `app/api/`, `backend/analytics/client.ts` | Owns Node.js/server setup, API routes, media moderation flow, and database connectivity from backend to UI. |
 | Akshank Bhadauria | Database Architect | `database/schema.sql`, `database/supabase/analytics-schema.sql`, `SCHEMA.md` | Owns ER design, DDL, table/index creation, relationships, and schema documentation. |
