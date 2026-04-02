@@ -1,3 +1,4 @@
+import { VideoTracker } from "@/frontend/components/video-tracker";
 import { notFound } from "next/navigation";
 import { Heart, PlayCircle, ShieldCheck, UserRound, Eye } from "lucide-react";
 import { Navbar } from "@/frontend/components/navbar";
@@ -74,7 +75,8 @@ export async function VideoPage({ slug }: VideoPageProps) {
                     className="aspect-video w-full bg-black"
                   />
                 ) : (
-                  <video
+                  <VideoTracker slug={slug}>
+                    <video
                     controls
                     playsInline
                     poster={getPreferredThumbnailUrl({ thumbnailUrl: media.thumbnailUrl, videoUrl: media.videoUrl })}
@@ -82,6 +84,7 @@ export async function VideoPage({ slug }: VideoPageProps) {
                   >
                     <source src={media.videoUrl} />
                   </video>
+                  </VideoTracker>
                 )}
               </div>
 
