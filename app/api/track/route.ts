@@ -41,6 +41,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, ...result }, { status: result.enabled ? 200 : 202 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to track watch event.";
+    const normalized = message.toLowerCase();
+
+    if (
+      normalized.includes("fetch failed") ||
+      normalized.includes("network") ||
+      normalized.includes("econnrefused") ||
+      normalized.includes("enotfound") ||
+      normalized.includes("etimedout")
+    ) {
+      return NextResponse.json(
+        {
+          enabled: false,
+          success: false,
+        },
+        { status: 202 },
+      );
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

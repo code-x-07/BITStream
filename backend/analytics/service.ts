@@ -45,6 +45,16 @@ function formatAnalyticsSetupReason(message: string) {
   const normalized = message.toLowerCase();
 
   if (
+    normalized.includes("fetch failed") ||
+    normalized.includes("network") ||
+    normalized.includes("econnrefused") ||
+    normalized.includes("enotfound") ||
+    normalized.includes("etimedout")
+  ) {
+    return "";
+  }
+
+  if (
     normalized.includes("user_profiles") ||
     normalized.includes("media_watch_events") ||
     normalized.includes("schema cache") ||
@@ -307,12 +317,14 @@ export async function getUserAnalytics(user: AppSessionUser): Promise<UserAnalyt
       popularContent,
     };
   } catch (error) {
+    const reason =
+      error instanceof Error
+        ? formatAnalyticsSetupReason(error.message)
+        : "Supabase analytics is configured, but the analytics tables are not ready yet.";
+
     return {
       ...EMPTY_ANALYTICS,
-      reason:
-        error instanceof Error
-          ? formatAnalyticsSetupReason(error.message)
-          : "Supabase analytics is configured, but the analytics tables are not ready yet.",
+      reason: reason || undefined,
       overview: {
         ...EMPTY_ANALYTICS.overview,
         approvedUploads: uploads.filter((item) => item.approval.status === "approved").length,
