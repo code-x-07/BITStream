@@ -24,6 +24,11 @@ export async function Navbar() {
             Discover
           </Link>
           {user && (
+            <Link href="/snap" className="transition-colors hover:text-primary">
+              Snap
+            </Link>
+          )}
+          {user && (
             <Link href="/upload" className="transition-colors hover:text-primary">
               Upload
             </Link>
@@ -86,6 +91,11 @@ export async function Navbar() {
           <Link href="/" className="whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:text-primary">
             Discover
           </Link>
+          {user && (
+            <Link href="/snap" className="whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:text-primary">
+              Snap
+            </Link>
+          )}
           {user && (
             <Link href="/upload" className="whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:text-primary">
               Upload
