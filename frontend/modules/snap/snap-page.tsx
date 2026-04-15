@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Camera, Flame, Sparkles } from "lucide-react";
+import { Camera, Flame, RefreshCw, Sparkles, SquarePen } from "lucide-react";
 import type { AppSessionUser } from "@/backend/auth/session";
 import type { SnapFeedResult, SnapItem } from "@/backend/snap/types";
 import { Navbar } from "@/frontend/components/navbar";
@@ -15,6 +15,8 @@ interface SnapPageProps {
   directUploadEnabled: boolean;
   initialFeed: SnapFeedResult;
 }
+
+type SnapTab = "live" | "post";
 
 async function createSnapRequest(payload: { caption: string; imageUrl: string }) {
   const response = await fetch("/api/snap", {
@@ -70,9 +72,26 @@ async function commentSnapRequest(snapId: string, comment: string) {
   return result.snap;
 }
 
+async function listSnapsRequest() {
+  const response = await fetch("/api/snap", {
+    method: "GET",
+  });
+
+  const result = (await response.json()) as SnapFeedResult & { error?: string };
+
+  if (!response.ok) {
+    throw new Error(result.reason || result.error || "Unable to load live snaps.");
+  }
+
+  return result;
+}
+
 export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: SnapPageProps) {
   const [feed, setFeed] = useState(initialFeed);
+  const [activeTab, setActiveTab] = useState<SnapTab>("post");
   const [selectedSnapId, setSelectedSnapId] = useState("");
+  const [refreshError, setRefreshError] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const selectedSnap = useMemo(
     () => feed.items.find((item) => item.id === selectedSnapId) || null,
     [feed.items, selectedSnapId],
@@ -87,12 +106,14 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
         items: options?.prepend ? [nextSnap, ...filtered] : [nextSnap, ...filtered],
       };
     });
+    setRefreshError("");
     setSelectedSnapId(nextSnap.id);
   }
 
   async function handleCreateSnap(payload: { caption: string; imageUrl: string }) {
     const nextSnap = await createSnapRequest(payload);
     upsertSnap(nextSnap, { prepend: true });
+    setActiveTab("live");
   }
 
   async function handleLikeSnap(snapId: string) {
@@ -103,6 +124,19 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   async function handleCommentSnap(snapId: string, comment: string) {
     const nextSnap = await commentSnapRequest(snapId, comment);
     upsertSnap(nextSnap);
+  }
+
+  async function handleRefreshLive() {
+    try {
+      setIsRefreshing(true);
+      setRefreshError("");
+      const nextFeed = await listSnapsRequest();
+      setFeed(nextFeed);
+    } catch (error) {
+      setRefreshError(error instanceof Error ? error.message : "Unable to load live snaps.");
+    } finally {
+      setIsRefreshing(false);
+    }
   }
 
   return (
@@ -160,35 +194,86 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
               </aside>
 
               <div className="space-y-8">
-                <SnapComposer directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
-
                 <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(17,27,43,0.92))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-6">
-                  <div className="mb-5 flex items-center justify-between gap-3">
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Campus strip</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-white">Live snaps</h2>
+                      <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Snap space</p>
+                      <h2 className="mt-2 text-2xl font-semibold text-white">
+                        {activeTab === "post" ? "Post a new snap" : "Live campus snaps"}
+                      </h2>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#c0cede]">
-                      <Flame className="h-4 w-4 text-[#f0d6a8]" />
-                      {feed.items.length} active
+                    <div className="inline-flex rounded-full border border-white/10 bg-black/20 p-1">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("post")}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                          activeTab === "post" ? "bg-[#f0d6a8] text-[#111827]" : "text-[#c0cede] hover:text-white"
+                        }`}
+                      >
+                        <SquarePen className="h-4 w-4" />
+                        Post
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("live")}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                          activeTab === "live" ? "bg-[#f0d6a8] text-[#111827]" : "text-[#c0cede] hover:text-white"
+                        }`}
+                      >
+                        <Flame className="h-4 w-4" />
+                        Live
+                      </button>
                     </div>
                   </div>
 
-                  {!feed.enabled && feed.reason && (
-                    <div className="mb-5 rounded-[1.5rem] border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
-                      <p className="font-semibold">Snap is not fully active yet.</p>
-                      <p className="mt-2 text-amber-100/90">{feed.reason}</p>
-                      <p className="mt-2 text-amber-100/75">
-                        Required file: <code className="rounded bg-black/20 px-2 py-1 text-xs">database/supabase/snap-schema.sql</code>
-                      </p>
-                    </div>
-                  )}
-
-                  {feed.items.length > 0 ? (
-                    <SnapStrip items={feed.items} onOpen={setSelectedSnapId} selectedId={selectedSnap?.id} />
+                  {activeTab === "post" ? (
+                    <SnapComposer directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
                   ) : (
-                    <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-black/10 px-4 py-16 text-center text-sm text-[#9bb0ca]">
-                      No active snaps yet. Post the first one from your side of campus.
+                    <div className="space-y-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm leading-6 text-[#9bb0ca]">
+                          See everything that is still live across campus for the next 24 hours.
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#c0cede]">
+                            <Flame className="h-4 w-4 text-[#f0d6a8]" />
+                            {feed.items.length} active
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRefreshLive}
+                            disabled={isRefreshing}
+                            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-[#f0d6a8]/35 hover:text-[#f0d6a8] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                            Refresh
+                          </button>
+                        </div>
+                      </div>
+
+                      {!feed.enabled && feed.reason && (
+                        <div className="rounded-[1.5rem] border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
+                          <p className="font-semibold">Snap is not fully active yet.</p>
+                          <p className="mt-2 text-amber-100/90">{feed.reason}</p>
+                          <p className="mt-2 text-amber-100/75">
+                            Required file: <code className="rounded bg-black/20 px-2 py-1 text-xs">database/supabase/snap-schema.sql</code>
+                          </p>
+                        </div>
+                      )}
+
+                      {refreshError && (
+                        <div className="rounded-[1.5rem] border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
+                          {refreshError}
+                        </div>
+                      )}
+
+                      {feed.items.length > 0 ? (
+                        <SnapStrip items={feed.items} onOpen={setSelectedSnapId} selectedId={selectedSnap?.id} />
+                      ) : (
+                        <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-black/10 px-4 py-16 text-center text-sm text-[#9bb0ca]">
+                          No active snaps yet. Post one first, then open the Live tab to see it here.
+                        </div>
+                      )}
                     </div>
                   )}
                 </section>
