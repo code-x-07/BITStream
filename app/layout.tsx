@@ -1,3 +1,4 @@
+import { ChatWidget } from "@/frontend/components/chat-widget";
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -28,6 +29,8 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <Analytics />
+        {/* This makes the chatbot appear on every page of the site */}
+        <ChatWidget />
       </body>
     </html>
   )
