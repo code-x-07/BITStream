@@ -1,8 +1,8 @@
 import { HomePage } from "@/frontend/modules/home/home-page";
 
 export const metadata = {
-  title: "BITStream | Approved campus media",
-  description: "Discover approved student uploads, movies, tutorials, and campus stories.",
+  title: "BITStream | Public and campus media",
+  description: "Discover public BITStream uploads without signing in, then unlock the full campus stream after login.",
 };
 
 export const dynamic = "force-dynamic";

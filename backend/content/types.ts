@@ -1,5 +1,7 @@
 import type { AppSessionUser } from "@/backend/auth/session";
 
+export const PUBLIC_CATEGORY = "Public" as const;
+
 export const CONTENT_CATEGORIES = [
   "Movies",
   "Series",
@@ -9,6 +11,7 @@ export const CONTENT_CATEGORIES = [
   "Comedy",
   "Music",
   "Tutorials",
+  PUBLIC_CATEGORY,
 ] as const;
 
 export const APPROVAL_STATUSES = ["pending", "approved", "rejected"] as const;

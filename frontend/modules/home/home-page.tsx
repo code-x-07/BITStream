@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Film, Filter, PlayCircle, Sparkles, UploadCloud } from "lucide-react";
-import { requireCampusUser } from "@/backend/auth/session";
+import { Film, Filter, Globe2, PlayCircle, Sparkles, UploadCloud } from "lucide-react";
+import { getCurrentUser } from "@/backend/auth/session";
 import { CurtainEntry } from "@/frontend/components/curtain-entry";
 import { MediaThumbnail } from "@/frontend/components/media-thumbnail";
 import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
-import { CONTENT_CATEGORIES } from "@/backend/content/types";
+import { CONTENT_CATEGORIES, PUBLIC_CATEGORY } from "@/backend/content/types";
 import { getApprovedMedia, getLibraryCounts } from "@/backend/content/repository";
 
 interface HomePageProps {
@@ -37,17 +37,29 @@ function shelfTitle(category: string) {
 }
 
 export async function HomePage({ searchParams }: HomePageProps) {
-  await requireCampusUser("/");
+  const user = await getCurrentUser();
+  const isGuest = !user;
   const resolvedParams = (await searchParams) || {};
-  const category = getSingleValue(resolvedParams.category) || "All";
+  const requestedCategory = getSingleValue(resolvedParams.category) || "All";
   const entry = getSingleValue(resolvedParams.entry) || "";
   const query = getSingleValue(resolvedParams.q) || "";
-  const media = await getApprovedMedia({ category, query });
-  const counts = await getLibraryCounts();
+  const visibleCategories = isGuest ? ["All", PUBLIC_CATEGORY] : ["All", ...CONTENT_CATEGORIES];
+  const category = visibleCategories.includes(requestedCategory) ? requestedCategory : "All";
+  const approvedMedia = await getApprovedMedia({ category: category === "All" ? undefined : category, query });
+  const media = isGuest ? approvedMedia.filter((item) => item.category === PUBLIC_CATEGORY) : approvedMedia;
+  const counts = isGuest
+    ? {
+        approved: media.length,
+        pending: 0,
+        rejected: 0,
+      }
+    : await getLibraryCounts();
   const heroCards = media.slice(0, 3);
   const featured = media.slice(0, 8);
   const categoryShelves =
-    category === "All"
+    isGuest
+      ? [{ name: "Public", items: media.slice(0, 12) }]
+      : category === "All"
       ? CONTENT_CATEGORIES.map((chip) => ({
           name: chip,
           items: media.filter((item) => item.category === chip).slice(0, 6),
@@ -85,16 +97,18 @@ export async function HomePage({ searchParams }: HomePageProps) {
           <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-end px-4 pb-10 pt-12 sm:min-h-[88vh] sm:px-6 sm:pb-16 sm:pt-16 lg:px-8 lg:pb-24">
             <div className="max-w-3xl space-y-5 sm:space-y-6">
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[0.28em] text-[#f0d6a8] backdrop-blur-sm sm:px-4 sm:text-xs sm:tracking-[0.35em]">
-                <Sparkles className="h-3.5 w-3.5" />
-                BITS Goa spotlight
+                {isGuest ? <Globe2 className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {isGuest ? "Open to everyone" : "BITS Goa spotlight"}
               </div>
 
               <div className="space-y-4">
                 <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
-                  Campus Stories
+                  {isGuest ? "Public Stream" : "Campus Stories"}
                 </h1>
                 <p className="max-w-2xl text-sm leading-6 text-[#d9e3f0] sm:text-lg sm:leading-7">
-                  Movies, hostel edits, tutorials, festival cuts, and late-night campus memories collected in one stream.
+                  {isGuest
+                    ? "Watch approved public uploads without signing in. Campus premieres, festival edits, music drops, and showcase cuts live here in one open-screen lane."
+                    : "Movies, hostel edits, tutorials, festival cuts, and late-night campus memories collected in one stream."}
                 </p>
               </div>
 
@@ -104,15 +118,25 @@ export async function HomePage({ searchParams }: HomePageProps) {
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7] sm:justify-start"
                 >
                   <PlayCircle className="h-4 w-4" />
-                  Start watching
+                  {isGuest ? "Explore public picks" : "Start watching"}
                 </Link>
-                <Link
-                  href="/upload"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12 sm:justify-start"
-                >
-                  <UploadCloud className="h-4 w-4" />
-                  Upload a story
-                </Link>
+                {isGuest ? (
+                  <Link
+                    href="/login?next=/"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12 sm:justify-start"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Campus sign in
+                  </Link>
+                ) : (
+                  <Link
+                    href="/upload"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12 sm:justify-start"
+                  >
+                    <UploadCloud className="h-4 w-4" />
+                    Upload a story
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -122,12 +146,14 @@ export async function HomePage({ searchParams }: HomePageProps) {
                 <p className="mt-3 text-3xl font-bold text-white sm:text-4xl">{counts.approved}</p>
               </div>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-4 backdrop-blur-sm sm:p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Fresh drops</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">{isGuest ? "Open picks" : "Fresh drops"}</p>
                 <p className="mt-3 text-3xl font-bold text-white sm:text-4xl">{Math.min(featured.length, 8)}</p>
               </div>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/22 p-4 backdrop-blur-sm sm:p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Tonight</p>
-                <p className="mt-3 text-sm font-semibold text-white sm:text-lg">Campus stories, sharper shelves, and faster picks.</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">{isGuest ? "Switch lanes" : "Tonight"}</p>
+                <p className="mt-3 text-sm font-semibold text-white sm:text-lg">
+                  {isGuest ? "Sign in to unlock the full campus-only catalog, uploads, and moderation flow." : "Campus stories, sharper shelves, and faster picks."}
+                </p>
               </div>
             </div>
           </div>
@@ -155,7 +181,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
             </form>
 
             <div className="mt-4 flex gap-3 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible">
-              {["All", ...CONTENT_CATEGORIES].map((chip) => {
+              {visibleCategories.map((chip) => {
                 const active = chip === category;
                 return (
                   <Link
@@ -240,7 +266,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
               <div className="mb-14">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Binge row</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">{isGuest ? "Open screen" : "Binge row"}</p>
                     <h2 className="mt-2 text-2xl font-semibold text-white">{shelfTitle(category)}</h2>
                   </div>
                   <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#b6c4d8] md:inline-flex">
@@ -278,10 +304,44 @@ export async function HomePage({ searchParams }: HomePageProps) {
               ))}
             </div>
 
+            {isGuest && (
+              <section className="mt-16 rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(7,17,31,0.94),rgba(18,32,52,0.94))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] sm:p-8">
+                <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+                  <div className="space-y-3">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[#f0d6a8]">Campus-only lane</p>
+                    <h2 className="text-3xl font-semibold text-white sm:text-4xl">Sign in to unlock the private stream.</h2>
+                    <p className="max-w-2xl text-sm leading-7 text-[#bbcade] sm:text-base">
+                      Public uploads stay visible here for everyone. Sign in with your Goa BITS account to access the full discover feed, upload your own videos, track history, and review submissions.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                    <Link
+                      href="/login?next=/"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f0d6a8] px-6 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7]"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Sign in with Google
+                    </Link>
+                    <Link
+                      href="#discover"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/12"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      Keep browsing
+                    </Link>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {media.length === 0 && (
               <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/4 px-6 py-16 text-center">
-                <p className="text-lg font-semibold text-white">No approved uploads match this filter yet.</p>
-                <p className="mt-2 text-sm text-[#aebdd1]">Try another category or upload the first story for it.</p>
+                <p className="text-lg font-semibold text-white">
+                  {isGuest ? "No public uploads match this filter yet." : "No approved uploads match this filter yet."}
+                </p>
+                <p className="mt-2 text-sm text-[#aebdd1]">
+                  {isGuest ? "Try another search or sign in to explore the full campus catalog." : "Try another category or upload the first story for it."}
+                </p>
               </div>
             )}
           </div>

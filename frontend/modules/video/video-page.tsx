@@ -4,10 +4,11 @@ import { Navbar } from "@/frontend/components/navbar";
 import { MediaCard } from "@/frontend/components/media-card";
 import { SiteFooter } from "@/frontend/components/site-footer";
 import { TrackedVideoPlayer } from "@/frontend/components/tracked-video-player";
-import { requireCampusUser } from "@/backend/auth/session";
+import { getCurrentUser } from "@/backend/auth/session";
 import { getApprovedMedia, getMediaBySlug } from "@/backend/content/repository";
 import { getPreferredThumbnailUrl } from "@/backend/content/thumbnail-utils";
 import { formatCompactNumber } from "@/backend/content/utils";
+import { PUBLIC_CATEGORY } from "@/backend/content/types";
 
 interface VideoPageProps {
   slug: string;
@@ -39,15 +40,17 @@ function getEmbedUrl(videoUrl: string) {
 }
 
 export async function VideoPage({ slug }: VideoPageProps) {
-  const user = await requireCampusUser(`/video/${slug}`);
+  const user = await getCurrentUser();
   const media = await getMediaBySlug(slug);
 
   if (!media) {
     notFound();
   }
 
+  const canViewPublicApproved = media.approval.status === "approved" && media.category === PUBLIC_CATEGORY;
   const canViewUnapproved =
-    media.approval.status === "approved" ||
+    canViewPublicApproved ||
+    (media.approval.status === "approved" && Boolean(user)) ||
     (user && (user.role === "admin" || user.email === media.uploader.email));
 
   if (!canViewUnapproved) {
