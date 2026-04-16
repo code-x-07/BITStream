@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Camera, Flame, RefreshCw, Sparkles, SquarePen } from "lucide-react";
 import type { AppSessionUser } from "@/backend/auth/session";
@@ -88,10 +90,13 @@ async function listSnapsRequest() {
 
 export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: SnapPageProps) {
   const [feed, setFeed] = useState(initialFeed);
-  const [activeTab, setActiveTab] = useState<SnapTab>("post");
   const [selectedSnapId, setSelectedSnapId] = useState("");
   const [refreshError, setRefreshError] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab: SnapTab = searchParams.get("tab") === "live" ? "live" : "post";
   const selectedSnap = useMemo(
     () => feed.items.find((item) => item.id === selectedSnapId) || null,
     [feed.items, selectedSnapId],
@@ -113,7 +118,7 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   async function handleCreateSnap(payload: { caption: string; imageUrl: string }) {
     const nextSnap = await createSnapRequest(payload);
     upsertSnap(nextSnap, { prepend: true });
-    setActiveTab("live");
+    router.push(`${pathname}?tab=live`);
   }
 
   async function handleLikeSnap(snapId: string) {
@@ -203,26 +208,24 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
                       </h2>
                     </div>
                     <div className="inline-flex rounded-full border border-white/10 bg-black/20 p-1">
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab("post")}
+                      <Link
+                        href={pathname}
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                           activeTab === "post" ? "bg-[#f0d6a8] text-[#111827]" : "text-[#c0cede] hover:text-white"
                         }`}
                       >
                         <SquarePen className="h-4 w-4" />
                         Post
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab("live")}
+                      </Link>
+                      <Link
+                        href={`${pathname}?tab=live`}
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                           activeTab === "live" ? "bg-[#f0d6a8] text-[#111827]" : "text-[#c0cede] hover:text-white"
                         }`}
                       >
                         <Flame className="h-4 w-4" />
                         Live
-                      </button>
+                      </Link>
                     </div>
                   </div>
 
