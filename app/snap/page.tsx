@@ -9,5 +9,5 @@ export const metadata = {
 export default async function Page() {
   const directUploadEnabled = cloudinaryUploadsEnabled() || process.env.VERCEL !== "1";
 
-  return <SnapPage currentUser={null} directUploadEnabled={directUploadEnabled} initialFeed={{ enabled: true, items: [] }} />;
+  return <SnapPage directUploadEnabled={directUploadEnabled} initialFeed={{ enabled: true, items: [] }} />;
 }

@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Camera, Flame, RefreshCw, Sparkles, SquarePen } from "lucide-react";
-import type { AppSessionUser } from "@/backend/auth/session";
-import { loginWithGoogle } from "@/backend/auth/actions";
 import type { SnapFeedResult, SnapItem } from "@/backend/snap/types";
 import { Navbar } from "@/frontend/components/navbar";
 import { SiteFooter } from "@/frontend/components/site-footer";
@@ -12,7 +10,6 @@ import { SnapStrip } from "@/frontend/modules/snap/snap-strip";
 import { SnapViewer } from "@/frontend/modules/snap/snap-viewer";
 
 interface SnapPageProps {
-  currentUser: AppSessionUser | null;
   directUploadEnabled: boolean;
   initialFeed: SnapFeedResult;
 }
@@ -103,7 +100,7 @@ async function listSnapsRequest() {
   return result;
 }
 
-export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: SnapPageProps) {
+export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
   const [feed, setFeed] = useState(initialFeed);
   const [activeTab, setActiveTab] = useState<SnapTab>("post");
   const [selectedSnapId, setSelectedSnapId] = useState("");
@@ -217,8 +214,8 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
                   </p>
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Signed in</p>
-                      <p className="mt-3 text-sm font-semibold text-white">{currentUser?.name || "BITS Goa user"}</p>
+                      <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Window</p>
+                      <p className="mt-3 text-sm font-semibold text-white">24 hours</p>
                     </div>
                     <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
                       <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Live now</p>
@@ -242,23 +239,6 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
               </aside>
 
               <div className="space-y-8">
-                <section className="rounded-[2rem] border border-amber-400/20 bg-amber-500/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-7">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#f0d6a8]">Campus-only access</p>
-                  <h2 className="mt-3 text-2xl font-semibold text-white">Use your BITS Goa login if Snap actions fail</h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-7 text-[#f7e6c6]">
-                    The page now loads first and handles Snap issues inside the UI. If posting, liking, or live refresh says unauthorized, sign in again and retry here.
-                  </p>
-                  <form action={loginWithGoogle} className="mt-5">
-                    <input type="hidden" name="redirectTo" value="/snap" />
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-full bg-[#f0d6a8] px-5 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7]"
-                    >
-                      Sign in with Google
-                    </button>
-                  </form>
-                </section>
-
                 <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(17,27,43,0.92))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-6">
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
