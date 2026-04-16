@@ -30,6 +30,10 @@ async function createSnapRequest(payload: { caption: string; imageUrl: string })
 
   const result = (await response.json()) as { error?: string; snap?: SnapItem; success?: boolean };
 
+  if (response.status === 401) {
+    throw new Error("Your session expired. Sign in again, then retry posting.");
+  }
+
   if (!response.ok || !result.success || !result.snap) {
     throw new Error(result.error || "Unable to create snap.");
   }
@@ -47,6 +51,10 @@ async function likeSnapRequest(snapId: string) {
   });
 
   const result = (await response.json()) as { error?: string; snap?: SnapItem; success?: boolean };
+
+  if (response.status === 401) {
+    throw new Error("Your session expired. Sign in again to like snaps.");
+  }
 
   if (!response.ok || !result.success || !result.snap) {
     throw new Error(result.error || "Unable to update like.");
@@ -66,6 +74,10 @@ async function commentSnapRequest(snapId: string, comment: string) {
 
   const result = (await response.json()) as { error?: string; snap?: SnapItem; success?: boolean };
 
+  if (response.status === 401) {
+    throw new Error("Your session expired. Sign in again to comment.");
+  }
+
   if (!response.ok || !result.success || !result.snap) {
     throw new Error(result.error || "Unable to add comment.");
   }
@@ -79,6 +91,10 @@ async function listSnapsRequest() {
   });
 
   const result = (await response.json()) as SnapFeedResult & { error?: string };
+
+  if (response.status === 401) {
+    throw new Error("Sign in again to load the live Snap lane.");
+  }
 
   if (!response.ok) {
     throw new Error(result.reason || result.error || "Unable to load live snaps.");
@@ -99,10 +115,6 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   );
 
   useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
-
     let cancelled = false;
 
     async function loadInitialLive() {
@@ -125,7 +137,7 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
     return () => {
       cancelled = true;
     };
-  }, [currentUser]);
+  }, []);
 
   function upsertSnap(nextSnap: SnapItem, options?: { prepend?: boolean }) {
     setFeed((current) => {
@@ -141,10 +153,6 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   }
 
   async function handleCreateSnap(payload: { caption: string; imageUrl: string }) {
-    if (!currentUser) {
-      throw new Error("Sign in to post a snap.");
-    }
-
     const nextSnap = await createSnapRequest(payload);
     upsertSnap(nextSnap, { prepend: true });
     const nextFeed = await listSnapsRequest().catch(() => null);
@@ -157,29 +165,16 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   }
 
   async function handleLikeSnap(snapId: string) {
-    if (!currentUser) {
-      throw new Error("Sign in to like snaps.");
-    }
-
     const nextSnap = await likeSnapRequest(snapId);
     upsertSnap(nextSnap);
   }
 
   async function handleCommentSnap(snapId: string, comment: string) {
-    if (!currentUser) {
-      throw new Error("Sign in to comment on snaps.");
-    }
-
     const nextSnap = await commentSnapRequest(snapId, comment);
     upsertSnap(nextSnap);
   }
 
   async function handleRefreshLive() {
-    if (!currentUser) {
-      setRefreshError("Sign in to view the live Snap lane.");
-      return;
-    }
-
     try {
       setIsRefreshing(true);
       setRefreshError("");
@@ -223,7 +218,7 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
                       <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Signed in</p>
-                      <p className="mt-3 text-sm font-semibold text-white">{currentUser?.name || "Guest session"}</p>
+                      <p className="mt-3 text-sm font-semibold text-white">{currentUser?.name || "BITS Goa user"}</p>
                     </div>
                     <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
                       <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Live now</p>
@@ -247,24 +242,22 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
               </aside>
 
               <div className="space-y-8">
-                {!currentUser && (
-                  <section className="rounded-[2rem] border border-amber-400/20 bg-amber-500/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-7">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[#f0d6a8]">Campus-only access</p>
-                    <h2 className="mt-3 text-2xl font-semibold text-white">Sign in to use Snap</h2>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-[#f7e6c6]">
-                      Snap is a BITS Goa lane, so posting, live viewing, likes, and comments need your campus Google account.
-                    </p>
-                    <form action={loginWithGoogle} className="mt-5">
-                      <input type="hidden" name="redirectTo" value="/snap" />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center justify-center rounded-full bg-[#f0d6a8] px-5 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7]"
-                      >
-                        Sign in with Google
-                      </button>
-                    </form>
-                  </section>
-                )}
+                <section className="rounded-[2rem] border border-amber-400/20 bg-amber-500/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-7">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[#f0d6a8]">Campus-only access</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-white">Use your BITS Goa login if Snap actions fail</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-[#f7e6c6]">
+                    The page now loads first and handles Snap issues inside the UI. If posting, liking, or live refresh says unauthorized, sign in again and retry here.
+                  </p>
+                  <form action={loginWithGoogle} className="mt-5">
+                    <input type="hidden" name="redirectTo" value="/snap" />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-full bg-[#f0d6a8] px-5 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7]"
+                    >
+                      Sign in with Google
+                    </button>
+                  </form>
+                </section>
 
                 <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(17,27,43,0.92))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-6">
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -299,13 +292,7 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
                   </div>
 
                   {activeTab === "post" ? (
-                    currentUser ? (
-                      <SnapComposer directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
-                    ) : (
-                      <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-black/10 px-4 py-16 text-center text-sm text-[#9bb0ca]">
-                        Sign in first, then post your campus moment here.
-                      </div>
-                    )
+                    <SnapComposer directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
                   ) : (
                     <div className="space-y-5">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

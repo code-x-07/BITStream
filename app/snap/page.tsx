@@ -1,5 +1,3 @@
-import { getCurrentUser } from "@/backend/auth/session";
-import type { SnapFeedResult } from "@/backend/snap/types";
 import { cloudinaryUploadsEnabled } from "@/backend/storage/file-uploads";
 import { SnapPage } from "@/frontend/modules/snap/snap-page";
 
@@ -8,15 +6,8 @@ export const metadata = {
   description: "24-hour campus snaps, reactions, and quick comments for BITS Goa.",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function Page() {
-  const user = await getCurrentUser();
-  const initialFeed: SnapFeedResult = {
-    enabled: true,
-    items: [],
-  };
   const directUploadEnabled = cloudinaryUploadsEnabled() || process.env.VERCEL !== "1";
 
-  return <SnapPage currentUser={user} directUploadEnabled={directUploadEnabled} initialFeed={initialFeed} />;
+  return <SnapPage currentUser={null} directUploadEnabled={directUploadEnabled} initialFeed={{ enabled: true, items: [] }} />;
 }
