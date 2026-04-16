@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Camera, Flame, RefreshCw, Sparkles, SquarePen } from "lucide-react";
 import type { SnapFeedResult, SnapItem } from "@/backend/snap/types";
-import { Navbar } from "@/frontend/components/navbar";
-import { SiteFooter } from "@/frontend/components/site-footer";
 import { SnapComposer } from "@/frontend/modules/snap/snap-composer";
 import { SnapStrip } from "@/frontend/modules/snap/snap-strip";
 import { SnapViewer } from "@/frontend/modules/snap/snap-viewer";
@@ -12,6 +10,7 @@ import { SnapViewer } from "@/frontend/modules/snap/snap-viewer";
 interface SnapPageProps {
   directUploadEnabled: boolean;
   initialFeed: SnapFeedResult;
+  viewerSignedIn: boolean;
 }
 
 type SnapTab = "live" | "post";
@@ -100,7 +99,7 @@ async function listSnapsRequest() {
   return result;
 }
 
-export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
+export function SnapPage({ directUploadEnabled, initialFeed, viewerSignedIn }: SnapPageProps) {
   const [feed, setFeed] = useState(initialFeed);
   const [activeTab, setActiveTab] = useState<SnapTab>("post");
   const [selectedSnapId, setSelectedSnapId] = useState("");
@@ -112,6 +111,11 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
   );
 
   useEffect(() => {
+    if (!viewerSignedIn) {
+      setRefreshError("");
+      return;
+    }
+
     let cancelled = false;
 
     async function loadInitialLive() {
@@ -134,7 +138,7 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [viewerSignedIn]);
 
   function upsertSnap(nextSnap: SnapItem, options?: { prepend?: boolean }) {
     setFeed((current) => {
@@ -185,61 +189,48 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background text-white">
-      <Navbar />
-
-      <main className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: "url('/homepage-assets/film-texture.jpg')",
-            backgroundPosition: "top center",
-            backgroundRepeat: "repeat-y",
-            backgroundSize: "100% auto",
-          }}
-        />
-
-        <section className="relative border-b border-white/10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-              <aside className="space-y-6">
-                <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,20,34,0.95),rgba(18,32,52,0.92))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] sm:p-8">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[#f0d6a8]">
-                    <Sparkles className="h-4 w-4" />
-                    24-hour lane
+    <>
+      <section className="relative border-b border-white/10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
+            <aside className="space-y-6">
+              <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,20,34,0.95),rgba(18,32,52,0.92))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] sm:p-8">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[#f0d6a8]">
+                  <Sparkles className="h-4 w-4" />
+                  24-hour lane
+                </div>
+                <h1 className="mt-5 text-4xl font-semibold text-white sm:text-5xl">Snap</h1>
+                <p className="mt-4 text-sm leading-7 text-[#c2d1e4] sm:text-base">
+                  Fast image drops for Goa BITS. Post a moment, keep it live for 24 hours, and let the campus react in real time.
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Window</p>
+                    <p className="mt-3 text-sm font-semibold text-white">24 hours</p>
                   </div>
-                  <h1 className="mt-5 text-4xl font-semibold text-white sm:text-5xl">Snap</h1>
-                  <p className="mt-4 text-sm leading-7 text-[#c2d1e4] sm:text-base">
-                    Fast image drops for Goa BITS. Post a moment, keep it live for 24 hours, and let the campus react in real time.
-                  </p>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Window</p>
-                      <p className="mt-3 text-sm font-semibold text-white">24 hours</p>
-                    </div>
-                    <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Live now</p>
-                      <p className="mt-3 text-2xl font-bold text-white">{feed.items.length}</p>
-                    </div>
+                  <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#d8bc88]">Live now</p>
+                    <p className="mt-3 text-2xl font-bold text-white">{feed.items.length}</p>
                   </div>
                 </div>
+              </div>
 
-                <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 sm:p-8">
-                  <div className="flex items-center gap-3">
-                    <Camera className="h-5 w-5 text-[#f0d6a8]" />
-                    <h2 className="text-lg font-semibold text-white">How Snap works</h2>
-                  </div>
-                  <div className="mt-5 space-y-4 text-sm leading-7 text-[#afc0d6]">
-                    <p>1. Upload an image or paste a hosted image URL.</p>
-                    <p>2. Add a short caption and post it to the lane.</p>
-                    <p>3. The snap stays visible to all signed-in BITS users for 24 hours.</p>
-                    <p>4. Others can like it and comment while it is live.</p>
-                  </div>
+              <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 sm:p-8">
+                <div className="flex items-center gap-3">
+                  <Camera className="h-5 w-5 text-[#f0d6a8]" />
+                  <h2 className="text-lg font-semibold text-white">How Snap works</h2>
                 </div>
-              </aside>
+                <div className="mt-5 space-y-4 text-sm leading-7 text-[#afc0d6]">
+                  <p>1. Upload an image or paste a hosted image URL.</p>
+                  <p>2. Add a short caption and post it to the lane.</p>
+                  <p>3. The snap stays visible to all signed-in BITS users for 24 hours.</p>
+                  <p>4. Others can like it and comment while it is live.</p>
+                </div>
+              </div>
+            </aside>
 
-              <div className="space-y-8">
-                <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(17,27,43,0.92))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-6">
+            <div className="space-y-8">
+              <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(17,27,43,0.92))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-6">
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] text-[#d8bc88]">Snap space</p>
@@ -272,7 +263,7 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
                   </div>
 
                   {activeTab === "post" ? (
-                    <SnapComposer directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
+                    <SnapComposer canPost={viewerSignedIn} directUploadEnabled={directUploadEnabled} onCreate={handleCreateSnap} />
                   ) : (
                     <div className="space-y-5">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -287,7 +278,7 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
                           <button
                             type="button"
                             onClick={handleRefreshLive}
-                            disabled={isRefreshing}
+                            disabled={!viewerSignedIn || isRefreshing}
                             className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-[#f0d6a8]/35 hover:text-[#f0d6a8] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -296,7 +287,13 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
                         </div>
                       </div>
 
-                      {!feed.enabled && feed.reason && (
+                      {!viewerSignedIn && (
+                        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4 text-sm text-[#d5e1ee]">
+                          Sign in from the top-right corner to view live campus snaps.
+                        </div>
+                      )}
+
+                      {viewerSignedIn && !feed.enabled && feed.reason && (
                         <div className="rounded-[1.5rem] border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
                           <p className="font-semibold">Snap is not fully active yet.</p>
                           <p className="mt-2 text-amber-100/90">{feed.reason}</p>
@@ -312,27 +309,23 @@ export function SnapPage({ directUploadEnabled, initialFeed }: SnapPageProps) {
                         </div>
                       )}
 
-                      {feed.items.length > 0 ? (
+                      {viewerSignedIn && feed.items.length > 0 ? (
                         <SnapStrip items={feed.items} onOpen={setSelectedSnapId} selectedId={selectedSnap?.id} />
-                      ) : (
+                      ) : viewerSignedIn ? (
                         <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-black/10 px-4 py-16 text-center text-sm text-[#9bb0ca]">
                           No active snaps yet. Post one first, then open the Live tab to see it here.
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   )}
-                </section>
-              </div>
+              </section>
             </div>
           </div>
-        </section>
-      </main>
-
+        </div>
+      </section>
       {selectedSnap && (
         <SnapViewer onClose={() => setSelectedSnapId("")} onComment={handleCommentSnap} onLike={handleLikeSnap} snap={selectedSnap} />
       )}
-
-      <SiteFooter />
-    </div>
+    </>
   );
 }

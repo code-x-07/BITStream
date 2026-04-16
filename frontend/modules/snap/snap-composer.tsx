@@ -15,6 +15,7 @@ interface SignedUploadPayload {
 }
 
 interface SnapComposerProps {
+  canPost: boolean;
   directUploadEnabled: boolean;
   onCreate: (payload: { caption: string; imageUrl: string }) => Promise<void>;
 }
@@ -87,7 +88,7 @@ function uploadImage(file: File, onProgress: (loaded: number, total: number) => 
   });
 }
 
-export function SnapComposer({ directUploadEnabled, onCreate }: SnapComposerProps) {
+export function SnapComposer({ canPost, directUploadEnabled, onCreate }: SnapComposerProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [caption, setCaption] = useState("");
   const [externalImageUrl, setExternalImageUrl] = useState("");
@@ -153,14 +154,15 @@ export function SnapComposer({ directUploadEnabled, onCreate }: SnapComposerProp
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <label className="space-y-2">
           <span className="text-sm font-medium text-white">Caption</span>
-          <textarea
-            value={caption}
-            onChange={(event) => setCaption(event.target.value)}
-            maxLength={220}
-            rows={5}
-            placeholder="Fest lights, coding night, cricket in the quad..."
-            className="w-full rounded-[1.5rem] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
-          />
+            <textarea
+              value={caption}
+              onChange={(event) => setCaption(event.target.value)}
+              maxLength={220}
+              rows={5}
+              disabled={!canPost || isSubmitting}
+              placeholder="Fest lights, coding night, cricket in the quad..."
+              className="w-full rounded-[1.5rem] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
+            />
           <p className="text-xs text-[#8fa3bd]">{caption.length}/220</p>
         </label>
 
@@ -173,6 +175,7 @@ export function SnapComposer({ directUploadEnabled, onCreate }: SnapComposerProp
                 type="url"
                 value={externalImageUrl}
                 onChange={(event) => setExternalImageUrl(event.target.value)}
+                disabled={!canPost || isSubmitting}
                 placeholder="https://..."
                 className="w-full rounded-2xl border border-white/10 bg-white/6 py-3 pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-[#8fa3bd] focus:border-[#f0d6a8]"
               />
@@ -192,13 +195,19 @@ export function SnapComposer({ directUploadEnabled, onCreate }: SnapComposerProp
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                disabled={!directUploadEnabled || isSubmitting}
+                disabled={!canPost || !directUploadEnabled || isSubmitting}
                 className="mt-4 block w-full text-sm text-[#afc0d6] file:mr-4 file:rounded-full file:border-0 file:bg-[#f0d6a8] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#111827] hover:file:bg-[#f7dfb7]"
               />
             </div>
           </label>
         </div>
       </div>
+
+      {!canPost && (
+        <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3 text-sm text-[#d7e0ec]">
+          Sign in from the top-right corner to post snaps. The page will stay open here.
+        </div>
+      )}
 
       {isSubmitting && (
         <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
@@ -222,7 +231,7 @@ export function SnapComposer({ directUploadEnabled, onCreate }: SnapComposerProp
         <p className="text-sm leading-6 text-[#9bb0ca]">Each snap stays live for 24 hours and is visible to everyone signed in at BITS Goa.</p>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={!canPost || isSubmitting}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f0d6a8] px-5 py-3 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#f7dfb7] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
