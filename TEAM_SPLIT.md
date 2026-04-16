@@ -20,9 +20,9 @@ This project is split across six contributors.
 - Why: This is the heaviest ownership area because it spans SQL, data modeling, analytics pipelines, and profile integration.
 
 ### Kanav Midha
-- Read first: `database/supabase/analytics-queries.sql`
-- Read next: `backend/analytics/service.ts`, `frontend/modules/profile/profile-charts.tsx`
-- Why: This is where view counts, watch duration, engagement, and popularity calculations are defined and surfaced.
+- Read first: `database/supabase/analytics-queries.sql`, `app/api/chat/route.ts`
+- Read next: `backend/analytics/service.ts`, `frontend/modules/profile/profile-charts.tsx`, `frontend/components/chat-widget.tsx`
+- Why: This area covers analytics logic, profile insights, and the chatbot recommendation flow built on top of the BITStream media library.
 
 ### Abhisht Shankar
 - Read first: `backend/content/`, `backend/storage/`
