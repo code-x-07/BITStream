@@ -118,6 +118,12 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
   async function handleCreateSnap(payload: { caption: string; imageUrl: string }) {
     const nextSnap = await createSnapRequest(payload);
     upsertSnap(nextSnap, { prepend: true });
+    const nextFeed = await listSnapsRequest().catch(() => null);
+
+    if (nextFeed) {
+      setFeed(nextFeed);
+    }
+
     router.push(`${pathname}?tab=live`);
   }
 

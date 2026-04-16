@@ -301,14 +301,19 @@ export async function createSnap(user: AppSessionUser, input: CreateSnapInput) {
       user_email: user.email,
       user_name: user.name,
     })
-    .select("id")
+    .select("id,user_email,user_name,user_avatar,image_url,caption,created_at,expires_at")
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return getSnapByIdForViewer(data.id, user.email);
+  return buildSnapItems({
+    comments: [],
+    likes: [],
+    posts: [data as SnapPostRow],
+    viewerEmail: user.email,
+  })[0] || null;
 }
 
 export async function toggleSnapLike(user: AppSessionUser, snapId: string) {
