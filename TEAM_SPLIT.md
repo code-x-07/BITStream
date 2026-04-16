@@ -6,7 +6,7 @@ This project is split across six contributors.
 | Member | Role | Primary Folders To Read | Contribution Scope |
 | --- | --- | --- | --- |
 | Hemant Kushwaha | SQL Development Lead | `database/`, `database/supabase/`, `backend/analytics/`, `backend/storage/supabase.ts`, `app/api/track/`, `app/profile/` | The core SQL layer, analytics integration, views, procedures/triggers strategy, and any unassigned cross-layer work. |
-| Kanav Midha | SQL & Analytics | `database/supabase/analytics-queries.sql`, `backend/analytics/service.ts`, `frontend/modules/profile/` | Owns analytical queries for view counts, watch duration, user engagement, content popularity, and metrics validation. |
+| Kanav Midha | SQL, Analytics & Chatbot | `database/supabase/analytics-queries.sql`, `backend/analytics/service.ts`, `frontend/modules/profile/`, `app/api/chat/`, `frontend/components/chat-widget.tsx` | Owns analytical queries for view counts, watch duration, user engagement, content popularity, metrics validation, and chatbot integration including the BITStream assistant UI, prompt grounding, and media recommendation flow. |
 | Abhisht Shankar | Backend Developer | `backend/content/`, `backend/storage/`, `app/api/`, `backend/analytics/client.ts` | Owns Node.js/server setup, API routes, media moderation flow, and database connectivity from backend to UI. |
 | Akshank Bhadauria | Database Architect | `database/schema.sql`, `database/supabase/analytics-schema.sql`, `SCHEMA.md` | Owns ER design, DDL, table/index creation, relationships, and schema documentation. |
 | Gauravi Srinivas | UI/UX Designer | `frontend/components/`, `frontend/modules/`, `app/globals.css`, `public/` | Owns interface design, navigation flow, responsive polish, and frontend integration of backend states. |
