@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Camera, Flame, RefreshCw, Sparkles, SquarePen } from "lucide-react";
 import type { AppSessionUser } from "@/backend/auth/session";
 import type { SnapFeedResult, SnapItem } from "@/backend/snap/types";
@@ -96,6 +96,31 @@ export function SnapPage({ currentUser, directUploadEnabled, initialFeed }: Snap
     () => feed.items.find((item) => item.id === selectedSnapId) || null,
     [feed.items, selectedSnapId],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInitialLive() {
+      try {
+        const nextFeed = await listSnapsRequest();
+
+        if (!cancelled) {
+          setFeed(nextFeed);
+          setRefreshError("");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setRefreshError(error instanceof Error ? error.message : "Unable to load live snaps.");
+        }
+      }
+    }
+
+    void loadInitialLive();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function upsertSnap(nextSnap: SnapItem, options?: { prepend?: boolean }) {
     setFeed((current) => {
