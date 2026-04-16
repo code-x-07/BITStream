@@ -1,4 +1,4 @@
-import { requireCampusUser } from "@/backend/auth/session";
+import { getCurrentUser } from "@/backend/auth/session";
 import type { SnapFeedResult } from "@/backend/snap/types";
 import { cloudinaryUploadsEnabled } from "@/backend/storage/file-uploads";
 import { SnapPage } from "@/frontend/modules/snap/snap-page";
@@ -11,7 +11,7 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const user = await requireCampusUser("/snap");
+  const user = await getCurrentUser();
   const initialFeed: SnapFeedResult = {
     enabled: true,
     items: [],
